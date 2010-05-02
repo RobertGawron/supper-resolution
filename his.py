@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import Image
-
+# this code is full of shit
 
 files = ['moon1.JPG', 'moon2.JPG']
 images = []
 output_fname = 'output.JPG'
 zoom = 2
-c = 3
+c = 2.2
 
 for f in files:
     images.append(Image.open(f))
@@ -19,14 +19,17 @@ estimated = estimated.resize(bigger_size, Image.ANTIALIAS)
 
 for i in images:
     """ every image may add sth to the output """
-    for x in range(0, i.size[0]-30):
-        for y in range(0, i.size[1]-30):
-            (re,ge,be) = i.getpixel((x,y))
-            (ri,gi,bi) = estimated.getpixel((x*zoom,y*zoom))
 
-            r = (re - ri)*c
-            """the are all black and white so whatever"""
-            estimated.putpixel((x*zoom*1.0, y*zoom*1.0), (r, r, r))
+
+    z = i.resize(bigger_size, Image.ANTIALIAS) 
+   
+    for x in range(0, estimated.size[0]-30):
+        for y in range(0, estimated.size[1]-30):
+            (fo,_,_) = estimated.getpixel((x,y))
+            (fi,_,_) = z.getpixel((x,y)) 
+
+            v = int((fo-fi)*c)
+            estimated.putpixel((x, y), (fo+v, fo+v, fo+v))
 
 
 estimated.save(output_fname)
