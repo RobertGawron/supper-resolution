@@ -6,7 +6,7 @@ files = ['moon1.JPG', 'moon2.JPG']
 images = []
 output_fname = 'output.JPG'
 zoom = 2
-c=3
+c = 3
 
 for f in files:
     images.append(Image.open(f))
@@ -26,7 +26,7 @@ for i in images:
 
             r = (re - ri)*c
             """the are all black and white so whatever"""
-            estimated.putpixel((x*zoom, y*zoom), (r, r, r))
+            estimated.putpixel((x*zoom*1.0, y*zoom*1.0), (r, r, r))
 
 
 estimated.save(output_fname)
