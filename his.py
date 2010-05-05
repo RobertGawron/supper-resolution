@@ -14,12 +14,50 @@ def create_hi_res_img(base_img, zoom):
     new_size = (base_img.size[0]*zoom, base_img.size[1]*zoom)
     return img.resize(new_size, Image.ANTIALIAS)
 
+def update_by_backprojection(hi_res_img, low_res_images, c):
+    for i in low_res_images:
+        z = i.resize(hi_res_img.size, Image.ANTIALIAS)
+
+        for x in range(1, hi_res_img.size[0]-30):
+            for y in range(1, hi_res_img.size[1]-30):
+                (fo,_,_) = hi_res_img.getpixel((x,y))
+
+                small = 0.2125
+                v = 0.0
+                # center
+                (fi,_,_) = z.getpixel((x,y)) 
+                v += (fo-fi) * 1.0 / (c*small*4)
+                # down
+                (fi,_,_) = z.getpixel((x,y+1)) 
+                v += (fo-fi) * small*small / (c*small*4)
+                # up
+                (fi,_,_) = z.getpixel((x,y-1)) 
+                v += (fo-fi) * small*small / (c*small*4)
+                # left
+                (fi,_,_) = z.getpixel((x+1,y)) 
+                v += (fo-fi) * small*small / (c*small*4)
+                # right
+                (fi,_,_) = z.getpixel((x-1,y)) 
+                v += (fo-fi) * small*small / (c*small*4)
+
+
+
+
+                v = int(v)
+
+                hi_res_img.putpixel((x, y), (fo+v, fo+v, fo+v))
+
+    return hi_res_img
+
+
+
 def main():
     # TODO this should be moved to config file or read from command line
     low_res_files = ['moon1.JPG', 'moon2.JPG']
     output_file = 'output.JPG'
     zoom = 2
-    c = 2.2
+    iterations = 5
+    c = 6.13
 
     low_res_images = load_images(low_res_files)
 
@@ -27,18 +65,8 @@ def main():
     # resolution image, we need to resize it by zoom factor
     hi_res_img = create_hi_res_img(low_res_images[0], zoom)
 
-    for i in low_res_files:
-        z = i.resize(bigger_size, Image.ANTIALIAS)
-
-        for x in range(0, estimated.size[0]-30):
-            for y in range(0, estimated.size[1]-30):
-                (fo,_,_) = estimated.getpixel((x,y))
-                (fi,_,_) = z.getpixel((x,y)) 
-
-                v = int((fo-fi)*c)
-                estimated.putpixel((x, y), (fo+v, fo+v, fo+v))
-       
-
+    for i in range(0, iterations):
+        hi_res_img = update_by_backprojection(hi_res_img, low_res_images, c)
 
     hi_res_img.save(output_file)
 
