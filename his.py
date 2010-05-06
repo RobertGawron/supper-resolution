@@ -26,19 +26,21 @@ def update_by_backprojection(hi_res_img, low_res_images, c):
                 v = 0.0
                 # center
                 (fi,_,_) = z.getpixel((x,y)) 
-                v += (fo-fi) * 1.0 / (c*small*4)
+
+                v += (fo-fi) * 1.0 / (1+c*small*4)
+
                 # down
                 (fi,_,_) = z.getpixel((x,y+1)) 
-                v += (fo-fi) * small*small / (c*small*4)
+                v += (fo-fi) * small*small / (1+c*small*4)
                 # up
                 (fi,_,_) = z.getpixel((x,y-1)) 
-                v += (fo-fi) * small*small / (c*small*4)
+                v += (fo-fi) * small*small / (1+c*small*4)
                 # left
                 (fi,_,_) = z.getpixel((x+1,y)) 
-                v += (fo-fi) * small*small / (c*small*4)
+                v += (fo-fi) * small*small / (1+c*small*4)
                 # right
                 (fi,_,_) = z.getpixel((x-1,y)) 
-                v += (fo-fi) * small*small / (c*small*4)
+                v += (fo-fi) * small*small / (1+c*small*4)
 
 
 
@@ -53,11 +55,12 @@ def update_by_backprojection(hi_res_img, low_res_images, c):
 
 def main():
     # TODO this should be moved to config file or read from command line
-    low_res_files = ['moon1.JPG', 'moon2.JPG']
+    low_res_files = ['100_1040.JPG', '100_1041.JPG']
+
     output_file = 'output.JPG'
     zoom = 2
     iterations = 5
-    c = 6.13
+    c = 15.0
 
     low_res_images = load_images(low_res_files)
 
