@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import Image
+import math
 # poor implementation based on theory from:
 # M. Irani and S. Peleg, "Super Resolution From Image Sequences"
 
@@ -67,12 +68,25 @@ class SRImage(RawImage):
 
     def _create_image(self):
         self._create_init_sr_image()
-        
+        print self._get_error() 
+        #print 'break'
+        #return 0        
+
         for n in range(0, self.params.iterations):
+            print self._get_error() 
             self._update_by_backprojection()
+    
 
+    def _get_error(self):
+        sp = self._simulate_making_img()
+        error = 0
+        for i in self.images:
+            for y in range(0, i.height):
+                for x in range(0, i.width):
+                    error += abs(sp[y][x] - i.body[y][x][0])
+        return error
 
-    def _update_by_backprojection(self):
+    def _simulate_making_img(self):
         sp = []
         for y in range(0, self.img.height):
             row = []
@@ -87,6 +101,26 @@ class SRImage(RawImage):
 
             if row != []:
                 sp.append(row)
+        print "sp %d" % len(sp)
+
+        simulated = []
+        z = self.params.zoom
+        for y in range(0, self.img.height/z):
+            row = []
+            for x in range(0, self.img.width/z):
+                (p1,_,_) = self.img.body[y*z][x*z]
+                (p2,_,_) = self.img.body[y*z+1][x*z]
+                (p3,_,_) = self.img.body[y*z][x*z+1]
+                (p4,_,_) = self.img.body[y*z+1][x*z+1]
+                p = int( (0.5*p1 + 0.5*(p2+p3+p4))/4.0 )
+                self.img.body[y*z][x*z] = p
+            simulated.append(row)
+        print "simulated %d" % len(simulated)
+
+        return simulated
+
+    def _update_by_backprojection(self):
+        sp = self._simulate_making_img()
 
         for low_res_img in self.images:
             for y in range(1, low_res_img.height-1):
@@ -99,8 +133,7 @@ class SRImage(RawImage):
                     (lp, _, _) = low_res_img.body[y][x]
                     spp = sp[y][x]
 
-
-                    hp1 += (spp-lp)/self.params.c
+                    hp1 += float(spp-lp)/self.params.c
                     self.img.body[y*2][x*2] = (hp1, hp1, hp1)
                     self.img.body[y*2+1][x*2] = (hp2, hp2, hp2)
                     self.img.body[y*2][x*2+1] = (hp3, hp3, hp3)
@@ -133,9 +166,9 @@ class SRImage(RawImage):
 
 def main():
     low_res_files = ['100_1040.JPG', '100_1041.JPG']
-    output_file = 'output.JPG'
+    output_file = 'output.tif'
 
-    params = SRParams(iterations=5, zoom=10, c=5) 
+    params = SRParams(iterations=5, zoom=2, c=0.1) 
     low_res_images = map(lambda u: RawImage(u), low_res_files)
     sr_image = SRImage(low_res_images, params)
     sr_image.save(output_file)
