@@ -135,7 +135,7 @@ def main():
     low_res_files = ['100_1040.JPG', '100_1041.JPG']
     output_file = 'output.JPG'
 
-    params = SRParams(iterations=5, zoom=10, c=10) 
+    params = SRParams(iterations=5, zoom=10, c=5) 
     low_res_images = map(lambda u: RawImage(u), low_res_files)
     sr_image = SRImage(low_res_images, params)
     sr_image.save(output_file)
