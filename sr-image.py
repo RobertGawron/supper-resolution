@@ -27,6 +27,25 @@ class RawImage:
 
         img.save(file_name)
     
+    def scale(self, factor):
+        # TODO add zoom here
+        scaled = []
+        for y in range(0, self.height):
+            row = []
+            for x in range(0, self.width):
+                if (x%2)==0 and (y%2)==0:
+                    (p1,_,_) = self.body[y][x]
+                    (p2,_,_) = self.body[y+1][x]
+                    (p3,_,_) = self.body[y][x+1]
+                    (p4,_,_) = self.body[y+1][x+1]
+                    p = int((p1+p2+p3+p4)*0.25)
+                    row.append((p,p,p))
+
+            if row != []:
+                scaled.append(row)
+
+        self.body = scaled    
+
 
 class SRParams:
     def __init__(self, iterations=10, zoom=2, c=10):
@@ -48,32 +67,75 @@ class SRImage(RawImage):
 
     def _create_image(self):
         self._create_init_sr_image()
+        
+        for n in range(0, self.params.iterations):
+            self._update_by_backprojection()
+
+
+    def _update_by_backprojection(self):
+        sp = []
+        for y in range(0, self.img.height):
+            row = []
+            for x in range(0, self.img.width):
+                if (x%2) == (y%2) == 0:
+                    (p1,_,_) = self.img.body[y][x]
+                    (p2,_,_) = self.img.body[y+1][x]
+                    (p3,_,_) = self.img.body[y][x+1]
+                    (p4,_,_) = self.img.body[y+1][x+1]
+                    p = int((p1+p2+p3+p4)*0.25)
+                    row.append(p)
+
+            if row != []:
+                sp.append(row)
+
+        for low_res_img in self.images:
+            for y in range(1, low_res_img.height-1):
+                for x in range(1, low_res_img.width-1):
+                    (hp1, _, _) = self.img.body[y*2][x*2]
+                    (hp2, _, _) = self.img.body[y*2+1][x*2]
+                    (hp3, _, _) = self.img.body[y*2][x*2+1]
+                    (hp4, _, _) = self.img.body[y*2+1][x*2+1]
+
+                    (lp, _, _) = low_res_img.body[y][x]
+                    spp = sp[y][x]
+
+
+                    hp1 += (spp-lp)/self.params.c
+                    self.img.body[y*2][x*2] = (hp1, hp1, hp1)
+                    self.img.body[y*2+1][x*2] = (hp2, hp2, hp2)
+                    self.img.body[y*2][x*2+1] = (hp3, hp3, hp3)
+                    self.img.body[y*2+1][x*2+1] = (hp4, hp4, hp4)
+    
+
+
+
 
     def _create_init_sr_image(self):
+        # shit here
         first = self.images[0]
         second = self.images[1]
         self.img.body = []
 
         # TODO add zoom here
-        for y in range(0, self.img.height):
+        for y in range(0, first.height):
             row = []
-            for x in range(0, self.img.width):
-                #row.append(first[y][x])
-                row.append((200, 200, 0))
-                row.append(second[y][x])
+
+            for x in range(0, first.width):
+                row.append(first.body[y][x])
+                row.append(second.body[y][x])
 
             self.img.body.append(row)
             self.img.body.append(row) 
 
-
-
+        self.img.width = first.width*2
+        self.img.height = first.height*2
 
 
 def main():
     low_res_files = ['100_1040.JPG', '100_1041.JPG']
     output_file = 'output.JPG'
 
-    params = SRParams(iterations=2, zoom=10, c=10) 
+    params = SRParams(iterations=5, zoom=10, c=10) 
     low_res_images = map(lambda u: RawImage(u), low_res_files)
     sr_image = SRImage(low_res_images, params)
     sr_image.save(output_file)
