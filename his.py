@@ -49,7 +49,10 @@ class SRImage(RawImage):
     def _create_image(self):
         pass
 
-def create_hi_res_img(images, zoom):
+    def _create_init_sr_image(self):
+        pass
+
+"""def create_hi_res_img(images, zoom):
     base = images[0]
     second = images[1]
     (width, height) = (len(base[0]), len(base))
@@ -115,7 +118,7 @@ def update_by_backprojection(hi_res_img, low_res_images, c):
                 hi_res_img[y+1][x+1] = (hp4, hp4, hp4)
 
     return hi_res_img
-               
+"""            
 
 
 def main():
