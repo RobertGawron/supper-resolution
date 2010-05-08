@@ -18,9 +18,8 @@ class RawImage:
         self.height = img.size[1]
 
     def save(self, file_name):
-        img = Image.open(file_name)
         size = (self.width, self.height)
-        img.resize(size, Image.LINEAR)
+        img = Image.new("RGB", size)
 
         for y in range(0, self.height):
             for x in range(0, self.width):
@@ -68,9 +67,6 @@ class SRImage(RawImage):
 
     def _create_image(self):
         self._create_init_sr_image()
-        print self._get_error() 
-        #print 'break'
-        #return 0        
 
         for n in range(0, self.params.iterations):
             print self._get_error() 
@@ -84,45 +80,40 @@ class SRImage(RawImage):
             for y in range(0, i.height):
                 for x in range(0, i.width):
                     error += abs(sp[y][x] - i.body[y][x][0])
-        return error
+        return error/float(i.height*i.width)
 
     def _simulate_making_img(self):
-        sp = []
-        for y in range(0, self.img.height):
-            row = []
-            for x in range(0, self.img.width):
-                if (x%2) == (y%2) == 0:
-                    (p1,_,_) = self.img.body[y][x]
-                    (p2,_,_) = self.img.body[y+1][x]
-                    (p3,_,_) = self.img.body[y][x+1]
-                    (p4,_,_) = self.img.body[y+1][x+1]
-                    p = int((p1+p2+p3+p4)*0.25)
-                    row.append(p)
-
-            if row != []:
-                sp.append(row)
-        print "sp %d" % len(sp)
-
         simulated = []
         z = self.params.zoom
         for y in range(0, self.img.height/z):
             row = []
             for x in range(0, self.img.width/z):
-                (p1,_,_) = self.img.body[y*z][x*z]
-                (p2,_,_) = self.img.body[y*z+1][x*z]
-                (p3,_,_) = self.img.body[y*z][x*z+1]
-                (p4,_,_) = self.img.body[y*z+1][x*z+1]
-                p = int( (0.5*p1 + 0.5*(p2+p3+p4))/4.0 )
-                self.img.body[y*z][x*z] = p
+
+                (p0,_,_) = self.img.body[y*z][x*z]
+
+                (p1,_,_) = self.img.body[y*z-1][x*z-1]
+                (p2,_,_) = self.img.body[y*z-1][x*z]
+                (p3,_,_) = self.img.body[y*z-1][x*z+1]
+
+                (p4,_,_) = self.img.body[y*z][x*z-1]
+                (p5,_,_) = self.img.body[y*z][x*z+1]
+
+                (p6,_,_) = self.img.body[y*z+1][x*z-1]
+                (p7,_,_) = self.img.body[y*z+1][x*z]
+                (p8,_,_) = self.img.body[y*z+1][x*z+1]
+
+                row.append( int( (0.4*p0 + 0.6*(p1+p2+p3+p4+p5+p6+p7+p8))/9.0 ) )
+
             simulated.append(row)
-        print "simulated %d" % len(simulated)
 
         return simulated
 
     def _update_by_backprojection(self):
-        sp = self._simulate_making_img()
+        #sp = self._simulate_making_img()
 
         for low_res_img in self.images:
+            sp = self._simulate_making_img()
+
             for y in range(1, low_res_img.height-1):
                 for x in range(1, low_res_img.width-1):
                     (hp1, _, _) = self.img.body[y*2][x*2]
@@ -132,14 +123,18 @@ class SRImage(RawImage):
 
                     (lp, _, _) = low_res_img.body[y][x]
                     spp = sp[y][x]
+    
+                    diff = int(float(spp-lp)/self.params.c) % 5
 
-                    hp1 += float(spp-lp)/self.params.c
+                    hp1 += diff
+                    hp2 += diff
+                    hp3 += diff
+                    hp4 += diff
+                    
                     self.img.body[y*2][x*2] = (hp1, hp1, hp1)
                     self.img.body[y*2+1][x*2] = (hp2, hp2, hp2)
                     self.img.body[y*2][x*2+1] = (hp3, hp3, hp3)
                     self.img.body[y*2+1][x*2+1] = (hp4, hp4, hp4)
-    
-
 
 
 
@@ -165,10 +160,10 @@ class SRImage(RawImage):
 
 
 def main():
-    low_res_files = ['100_1040.JPG', '100_1041.JPG']
+    low_res_files = ['100_1048.JPG', '100_1048.JPG']
     output_file = 'output.tif'
 
-    params = SRParams(iterations=5, zoom=2, c=0.1) 
+    params = SRParams(iterations=8, zoom=2, c=10) 
     low_res_images = map(lambda u: RawImage(u), low_res_files)
     sr_image = SRImage(low_res_images, params)
     sr_image.save(output_file)
