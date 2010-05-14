@@ -9,20 +9,12 @@ def take_a_photo(hi_res, move, hps, f):
     for x in range(1, lo.size[0]-1):
         for y in range(1, lo.size[1]-1):
             p0 = hi_res.getpixel((x, y))
-
-            p1 = hi_res.getpixel((x-1, y-1))
-            p2 = hi_res.getpixel((x, y-1))
-            p3 = hi_res.getpixel((x+1, y-1))
-
-            p4 = hi_res.getpixel((x-1, y))
-            p5 = hi_res.getpixel((x+1, y))
-
-            p6 = hi_res.getpixel((x-1, y+1))
-            p7 = hi_res.getpixel((x, y+1))
-            p8 = hi_res.getpixel((x+1, y+1))
+            p1 = hi_res.getpixel((x+1, y))
+            p2 = hi_res.getpixel((x, y+1))
+            p3 = hi_res.getpixel((x+1, y+1))
 
             out = [0.0, 0.0, 0.0]
-            pixels = [p1, p2, p3, p4, p0, p5, p6, p7, p8]
+            pixels = [p0, p1, p2, p3]
 
             for i in range(0, len(hps)):
                 out[0] += hps[i]*pixels[i][0]
@@ -30,7 +22,7 @@ def take_a_photo(hi_res, move, hps, f):
                 out[2] += hps[i]*pixels[i][2]
 
             out = map(lambda u: int(u/30), out)
-            lo.putpixel((x-move[0], y+move[1]), (out[0], out[1], out[2]))
+            lo.putpixel((x+move[0], y+move[1]), (out[0], out[1], out[2]))
 
 
     return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.LINEAR)
@@ -51,8 +43,7 @@ def make_diff(base, mask):
 def main():
     low_res_files = [('gen_0_0.tif', (0,0)), ('gen_1_0.tif', (1,0))]
     output_file = 'output.tif'
-    hps = [0.2, 1.0, 0.2, 1.0, 3.0, 1.0, 0.2, 1.0, 0.2]
-    hps = [1.080, 3.400, 1.080, 3.400, 11.000, 3.400, 1.080, 3.400, 1.080]
+    hps = [1.0, 1.0, 1.0, 1.0]
     logging.debug(hps)
 
     f = 4
@@ -76,16 +67,16 @@ def main():
         i0 = i0.resize((i0.size[0]*f, i0.size[1]*f), Image.LINEAR)
         i1 = i1.resize((i1.size[0]*f, i1.size[1]*f), Image.LINEAR)
 
-        i0.save('dupa1.tif')
-        i1.save('dupa2.tif')
+        #i0.save('dupa1.tif')
+        #i1.save('dupa2.tif')
 
-        c =  0.25
+        c =  0.15
 
         for x in range(0, i0.size[0]-1):
             for y in range(0, i0.size[1]):
                 (r, g, b) = estimation.getpixel((x, y))
                 (r1, g1, b1) = i0.getpixel((x, y))
-                (r2, g2, b2) = i1.getpixel((x+1, y))
+                (r2, g2, b2) = i1.getpixel((x, y))
 
                 r += int((r1+r2) * c)
                 g += int((g1+g2) * c)
