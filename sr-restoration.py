@@ -25,7 +25,7 @@ def take_a_photo(hi_res, move, hps, f):
             lo.putpixel((x+move[0], y+move[1]), (out[0], out[1], out[2]))
 
 
-    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.LINEAR)
+    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.BICUBIC)
 
 
 def make_diff(base, mask):
@@ -40,10 +40,13 @@ def make_diff(base, mask):
     return base
 
 
+
 def main():
     low_res_files = [('gen_0_0.tif', (0,0)), ('gen_1_0.tif', (1,0))]
     output_file = 'output.tif'
     hps = [1.0, 1.0, 1.0, 1.0]
+    hps = [4.0, 4.0, 4.0, 4.0]
+
     logging.debug(hps)
 
     f = 4
@@ -52,42 +55,46 @@ def main():
     base_for_estimation = low_res_imgs[0][0]
     estimation = base_for_estimation.resize((base_for_estimation.size[0]*f, base_for_estimation.size[1]*f), Image.LINEAR)
 
-    for iter in range(0, 3):
-        logging.info('iteration #%d' % iter)
+    for iter in range(0, 7):
+        total_error = 0
 
         # symulujemy robienie zdjecia
         i0 = take_a_photo(estimation, (0,0), hps, f)
         i1 = take_a_photo(estimation, (1,0), hps, f)
 
         # szukamy bledu miedzy estymacja a zdjeciem LR
-        i0 = make_diff(i0, low_res_imgs[0][0])
-        i1 = make_diff(i1, low_res_imgs[1][0])
+        i0 = make_diff(low_res_imgs[0][0], i0)
+        i1 = make_diff(low_res_imgs[1][0], i1)
  
         # robi resiza by dopasowac rozmiar LR do SR przed nanoszeniem diffow  
-        i0 = i0.resize((i0.size[0]*f, i0.size[1]*f), Image.LINEAR)
-        i1 = i1.resize((i1.size[0]*f, i1.size[1]*f), Image.LINEAR)
+        i0 = i0.resize((i0.size[0]*f, i0.size[1]*f), Image.BICUBIC)
+        i1 = i1.resize((i1.size[0]*f, i1.size[1]*f), Image.BICUBIC)
 
-        #i0.save('dupa1.tif')
-        #i1.save('dupa2.tif')
-
-        c =  0.15
+        c =  0.8
 
         for x in range(0, i0.size[0]-1):
             for y in range(0, i0.size[1]):
-                (r, g, b) = estimation.getpixel((x, y))
-                (r1, g1, b1) = i0.getpixel((x, y))
-                (r2, g2, b2) = i1.getpixel((x, y))
+                for observed in (i0, i1):
+                    (r, g, b) = estimation.getpixel((x, y))
+                    (ro, go, bo) = observed.getpixel((x, y))
+                    total_error += ro
 
-                r += int((r1+r2) * c)
-                g += int((g1+g2) * c)
-                b += int((b1+b2) * c)
+                    
+                    if ro > 0:
+                        ro = 1
+                    elif ro < 0:
+                        ro = 0
+                    #r += int(ro * c)
+                    #g += int(go * c)
+                    #b += int(bo * c)
 
-                estimation.putpixel((x,y), (r,g,b))
+                    g = r
+                    b = r
+                    estimation.putpixel((x,y), (r,g,b))
 
+        logging.info('iteration #%2d done, estimation error: %10d' % (iter, total_error))
 
     estimation.save(output_file)
-
-
 
 
 if __name__=="__main__":

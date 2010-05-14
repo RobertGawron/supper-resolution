@@ -24,7 +24,7 @@ def take_a_photo(hi_res, move, hps, f):
             lo.putpixel((x+move[0], y+move[1]), (out[0], out[1], out[2]))
 
 
-    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.LINEAR)
+    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.BICUBIC)
 
 
 
