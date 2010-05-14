@@ -3,8 +3,7 @@ import Image
 import math
 import logging
 
-
-def estimate_pic(hps, hi_res, move, f):
+def take_a_photo(hi_res, move, hps, f):
     lo = Image.new('RGB',hi_res.size)
 
     for x in range(1, lo.size[0]-1):
@@ -66,8 +65,8 @@ def main():
         logging.info('iteration #%d' % iter)
 
         # symulujemy robienie zdjecia
-        i0 = estimate_pic(hps, estimation, (0,0), f)
-        i1 = estimate_pic(hps, estimation, (1,0), f)
+        i0 = take_a_photo(estimation, (0,0), hps, f)
+        i1 = take_a_photo(estimation, (1,0), hps, f)
 
         # szukamy bledu miedzy estymacja a zdjeciem LR
         i0 = make_diff(i0, low_res_imgs[0][0])
@@ -80,10 +79,10 @@ def main():
         i0.save('dupa1.tif')
         i1.save('dupa2.tif')
 
-        c =  0.15
+        c =  0.25
 
         for x in range(0, i0.size[0]-1):
-            for y in range(1, i0.size[1]-1):
+            for y in range(0, i0.size[1]):
                 (r, g, b) = estimation.getpixel((x, y))
                 (r1, g1, b1) = i0.getpixel((x, y))
                 (r2, g2, b2) = i1.getpixel((x+1, y))
