@@ -2,44 +2,48 @@
 import Image
 import logging
 
-def take_a_photo(hi_res, move, hps, f):
-    lo = Image.new('RGB',hi_res.size)
+def take_a_photo(hi_res, offset, hps, f):
+    size = hi_res.size
+    lo = Image.new('RGB', size)
 
-    for x in range(1, lo.size[0]-1):
-        for y in range(1, lo.size[1]-1):
-            p0 = hi_res.getpixel((x, y))
-            p1 = hi_res.getpixel((x+1, y))
-            p2 = hi_res.getpixel((x, y+1))
-            p3 = hi_res.getpixel((x+1, y+1))
+    mask = ((-1, -1), (0, -1), (1, -1),
+            (-1,  0), (0,  0), (1,  0),
+            (-1,  1), (0,  1), (1,  1))
 
-            out = [0.0, 0.0, 0.0]
-            pixels = [p0, p1, p2, p3]
+    for x in range(1+offset[0], hi_res.size[0]-1-offset[0]):
+        for y in range(1+offset[1], hi_res.size[1]-1-offset[1]):
+            used_pixels = map(lambda (i,j): hi_res.getpixel((x+i, y+j)), mask)    
+            
+            (r, g, b) = (0, 0, 0)
+            for (pixel, weight) in zip(used_pixels, hps):
+                (r, g, b) = (r + pixel[0] * weight, g + pixel[1] * weight, b + pixel[2] * weight) 
+                
+            scale = len(used_pixels)
+            (r, g, b) = (r/scale, g/scale, b/scale)
 
-            for i in range(0, len(hps)):
-                out[0] += hps[i]*pixels[i][0]
-                out[1] += hps[i]*pixels[i][1]
-                out[2] += hps[i]*pixels[i][2]
-
-            out = map(lambda u: int(u/10), out) # fuck
-            lo.putpixel((x+move[0], y+move[1]), (out[0], out[1], out[2]))
-
+            lo.putpixel((x+offset[0], y+offset[1]), (r, g, b))
 
     return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.BICUBIC)
 
 
-
 def main():
     original_file = 'original.tif'
-    hps = [1.0, 1.0, 1.0, 1.0]
-    f = 4
+    hps = (0.5, 1.0, 0.5, 
+           1.0, 3.0, 1.0,
+           0.5, 1.0, 0.5)
+    f = 3
 
     real_img = Image.open(original_file)
 
     i0 = take_a_photo(real_img, (0,0), hps, f)
-    i1 = take_a_photo(real_img, (1,0), hps, f)
+    i1 = take_a_photo(real_img, (0,1), hps, f)
+    i2 = take_a_photo(real_img, (1,0), hps, f)
+    i3 = take_a_photo(real_img, (1,1), hps, f)
 
     i0.save('gen_0_0.tif')
-    i1.save('gen_1_0.tif')
+    i1.save('gen_0_1.tif')
+    i2.save('gen_1_0.tif')
+    i3.save('gen_1_1.tif')
 
 
 if __name__=="__main__":
