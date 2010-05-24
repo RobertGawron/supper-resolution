@@ -10,8 +10,8 @@ def take_a_photo(hi_res, offset, hps, f):
             (-1,  0), (0,  0), (1,  0),
             (-1,  1), (0,  1), (1,  1))
 
-    for x in range(1+offset[0], hi_res.size[0]-1-offset[0]):
-        for y in range(1+offset[1], hi_res.size[1]-1-offset[1]):
+    for x in range(1, hi_res.size[0]-1):
+        for y in range(1, hi_res.size[1]-1):
             used_pixels = map(lambda (i,j): hi_res.getpixel((x+i, y+j)), mask)    
             
             (r, g, b) = (0, 0, 0)
@@ -23,7 +23,7 @@ def take_a_photo(hi_res, offset, hps, f):
 
             lo.putpixel((x+offset[0], y+offset[1]), (r, g, b))
 
-    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.BICUBIC)
+    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.ANTIALIAS)
 
 
 def main():

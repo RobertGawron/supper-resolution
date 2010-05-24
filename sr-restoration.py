@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-import Image
 import math
 import logging
+import Image
+
+
 
 def take_a_photo(hi_res, offset, hps, f):
     size = hi_res.size
@@ -11,8 +13,8 @@ def take_a_photo(hi_res, offset, hps, f):
             (-1,  0), (0,  0), (1,  0),
             (-1,  1), (0,  1), (1,  1))
 
-    for x in range(1+offset[0], hi_res.size[0]-1-offset[0]):
-        for y in range(1+offset[1], hi_res.size[1]-1-offset[1]):
+    for x in range(1, hi_res.size[0]-1):
+        for y in range(1, hi_res.size[1]-1):
             used_pixels = map(lambda (i,j): hi_res.getpixel((x+i, y+j)), mask)    
             
             (r, g, b) = (0, 0, 0)
@@ -24,19 +26,8 @@ def take_a_photo(hi_res, offset, hps, f):
 
             lo.putpixel((x+offset[0], y+offset[1]), (r, g, b))
 
-    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.BICUBIC)
+    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.ANTIALIAS)
 
-
-def make_diff(base, mask):
-    for x in range(1, base.size[0]-1):
-        for y in range(1, base.size[1]-1):
-            (r, g, b) = base.getpixel((x, y))
-            (r0, g0, b0) = mask.getpixel((x, y))
-            r = r - r0 + 100
-            g = g - g0 + 100
-            b = b - b0 + 100
-            base.putpixel((x,y), (r,g,b))
-    return base
 
 
 
@@ -45,7 +36,9 @@ def main():
                      ('gen_0_1.tif', (0,1)), 
                      ('gen_1_0.tif', (1,0)), 
                      ('gen_1_1.tif', (1,1))]
-    output_file = 'output.tif'
+
+    output_file = 'gen_estimation.tif'
+
     hps = (0.5, 1.0, 0.5, 
            1.0, 3.0, 1.0,
            0.5, 1.0, 0.5)
@@ -56,9 +49,11 @@ def main():
 
     low_res_imgs = map(lambda (f,v):  (Image.open(f),v), low_res_files)
     base_for_estimation = low_res_imgs[0][0]
-    estimation = base_for_estimation.resize((base_for_estimation.size[0]*f, base_for_estimation.size[1]*f), Image.LINEAR)
+    estimation = base_for_estimation.resize((base_for_estimation.size[0]*f, base_for_estimation.size[1]*f), Image.ANTIALIAS)
 
-    for iter in range(0, 1):
+    K = len(low_res_imgs)
+
+    for iter in range(0, 30):
         total_error = 0
 
         # symulujemy robienie zdjecia
@@ -67,37 +62,64 @@ def main():
         i2 = take_a_photo(estimation, (1,0), hps, f)
         i3 = take_a_photo(estimation, (1,1), hps, f)
 
-        # szukamy bledu miedzy estymacja a zdjeciem LR
-        i0 = make_diff(low_res_imgs[0][0], i0)
-        i1 = make_diff(low_res_imgs[1][0], i1)
-        i2 = make_diff(low_res_imgs[2][0], i2)
-        i3 = make_diff(low_res_imgs[3][0], i3)
+        # robie diffa na LR, rzutuje hsp na HR
+        for (key, lr_estimated, (iz,jz)) in ((0, i0,(0,0)), (1, i1,(0,1)), (2, i2,(1,0)), (3, i3,(1,1))):
+            diff = Image.new('RGB', i0.size)
 
- 
-        # robi resiza by dopasowac rozmiar LR do SR przed nanoszeniem diffow  
-        i0 = i0.resize((i0.size[0]*f, i0.size[1]*f), Image.BICUBIC)
-        i1 = i1.resize((i1.size[0]*f, i1.size[1]*f), Image.BICUBIC)
-        i2 = i2.resize((i2.size[0]*f, i2.size[1]*f), Image.BICUBIC)
-        i3 = i3.resize((i3.size[0]*f, i3.size[1]*f), Image.BICUBIC)
+            for x in range(0, lr_estimated.size[0]):
+                for y in range(0, lr_estimated.size[1]):
+                    (r, g, b) = low_res_imgs[key][0].getpixel((x, y))
+                    (r0, g0, b0) = lr_estimated.getpixel((x, y))
 
-        c =  0.8
+                    total_error += abs(r - r0)
 
-        for x in range(2, i0.size[0]-2):
-            for y in range(2, i0.size[1]-2):
-                for (observed, (i,j)) in ((i0,(0,0)), (i1,(0,1)), (i2,(1,0)), (i3,(1,1))):
-                    (r, g, b) = estimation.getpixel((x, y))
-                    (ro, go, bo) = observed.getpixel((x+i, y+j))
-                    (ro, go, bo) =  (ro-100, go-100, bo-100) 
+                    r = ((r - r0)/2 ) + 120
+                    g = ((g - g0)/2 ) + 120
+                    b = ((b - b0)/2 ) + 120
 
-                    total_error += ro
+                    diff.putpixel((x, y), (r, g, b))
                     
-                    r += int(ro * c)
-                    g += int(go * c)
-                    b += int(bo * c)
+                    
+            # diff
+            diff = diff.resize((diff.size[0]*f, diff.size[1]*f), Image.ANTIALIAS)
 
-                    estimation.putpixel((x,y), (r,g,b))
 
-        logging.info('iteration #%2d done, estimation error: %10d' % (iter, total_error))
+            # robie hpsa
+            hpsowane = Image.new('RGB', diff.size)
+            for x in range(1, hpsowane.size[0]-1):
+                for y in range(1, hpsowane.size[1]-1):
+
+
+                    hpsx = [4.5, 12.0, 4.5, 12.0, 33.0, 12.0, 4.5, 12.0, 4.5]
+
+
+                    p0 = diff.getpixel((x - 1, y - 1))
+                    p1 = diff.getpixel((x,     y - 1))
+                    p2 = diff.getpixel((x + 1, y - 1))
+                             
+                    p3 = diff.getpixel((x - 1, y))
+                    p4 = diff.getpixel((x,     y))
+                    p5 = diff.getpixel((x + 1, y))
+
+                    p6 = diff.getpixel((x - 1, y + 1))
+                    p7 = diff.getpixel((x,     y + 1))
+                    p8 = diff.getpixel((x + 1, y + 1))
+
+
+                    r  = (p0[0]-120)*hpsx[0] + (p1[0]-120)*hpsx[1] + (p2[0]-120)*hpsx[2]
+                    r += (p3[0]-120)*hpsx[3] + (p4[0]-120)*hpsx[4] + (p5[0]-120)*hpsx[5]
+                    r += (p6[0]-120)*hpsx[6] + (p7[0]-120)*hpsx[7] + (p8[0]-120)*hpsx[8]
+
+                    r /= 9*9
+
+
+                    (a1,a2,a3) = estimation.getpixel((x-iz,y-jz))
+                    a1 += r/K
+                    
+                    estimation.putpixel((x-iz,y-jz), (a1,a1,a1))
+
+        estimation.save('_'+str(iter)+output_file)
+        logging.info('iteration #%2d done, estimation error: %6d' % (iter, total_error/K))
 
     estimation.save(output_file)
 
