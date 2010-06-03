@@ -1,8 +1,12 @@
 #!/usr/bin/env python
+__author__ =  'Robert Gawron - http://rgawron.megiteam.pl'
+__version__ =  '1.0'
+__licence__ = 'BSD licence'
+
 import math
 import logging
 import Image
-
+from optparse import OptionParser
 
 
 def take_a_photo(hi_res, offset, hps, f):
@@ -26,7 +30,7 @@ def take_a_photo(hi_res, offset, hps, f):
 
             lo.putpixel((x+offset[0], y+offset[1]), (r, g, b))
 
-    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.ANTIALIAS)
+    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.LINEAR)
 
 
 
@@ -55,13 +59,53 @@ def update_estimation(high_res_image, low_res_images, low_res_move, hps, k, f):
                 diff.putpixel((x, y), (ro, go, bo))
  
 
-        diff = diff.resize((diff.size[0]*f, diff.size[1]*f), Image.ANTIALIAS)
+        diff = diff.resize((diff.size[0]*f, diff.size[1]*f), Image.LINEAR)
 
         # robie hpsa
-        hpsowane = Image.new('RGB', diff.size)
-        for x in range(1, hpsowane.size[0]-1):
-            for y in range(1, hpsowane.size[1]-1):
+        #hpsowane = Image.new('RGB', diff.size)
+        ss = 2
+        for x in range(ss, diff.size[0]-ss):
+            for y in range(ss, diff.size[1]-ss):
                     hpsx = [4.5, 12.0, 4.5, 12.0, 33.0, 12.0, 4.5, 12.0, 4.5]
+
+
+                    """p = (diff.getpixel((x, y))[0] - 120)/(9*9*9*k)
+
+
+                    z = p*hps[0] + high_res_image.getpixel((x - dx-1, y - dy-1))[0]
+                    high_res_image.putpixel((x - dx-1, y - dy-1), (z,z,z))
+
+                    z = p*hps[1] + high_res_image.getpixel((x - dx, y - dy-1))[0]
+                    high_res_image.putpixel((x - dx, y - dy-1), (z,z,z))
+
+                    z = p*hps[2] + high_res_image.getpixel((x - dx+1, y -dy-1))[0]
+                    high_res_image.putpixel((x - dx+1, y - dy-1), (z,z,z))
+
+
+
+                    z = p*hps[3] + high_res_image.getpixel((x - dx-1, y -dy))[0]
+                    high_res_image.putpixel((x - dx-1, y - dy), (z,z,z))
+
+                    z = p*hps[4] + high_res_image.getpixel((x - dx, y - dy))[0]
+                    high_res_image.putpixel((x - dx, y - dy), (z,z,z))
+
+                    z = p*hps[5] + high_res_image.getpixel((x - dx+1, y -dy))[0]
+                    high_res_image.putpixel((x - dx+1, y - dy), (z,z,z))
+
+
+
+
+                    z = p*hps[6] + high_res_image.getpixel((x - dx-1, y - dy+1))[0]
+                    high_res_image.putpixel((x - dx-1, y - dy+1), (z,z,z))
+
+                    z = p*hps[7] + high_res_image.getpixel((x - dx, y -dy+1))[0]
+                    high_res_image.putpixel((x - dx, y - dy+1), (z,z,z))
+
+                    z = p*hps[8] + high_res_image.getpixel((x - dx+1, y -dy+1))[0]
+                    high_res_image.putpixel((x - dx+1, y - dy+1), (z,z,z))"""
+
+
+
 
                     p0 = diff.getpixel((x - 1, y - 1))
                     p1 = diff.getpixel((x,     y - 1))
@@ -79,14 +123,9 @@ def update_estimation(high_res_image, low_res_images, low_res_move, hps, k, f):
                     r += (p3[0]-120)*hpsx[3] + (p4[0]-120)*hpsx[4] + (p5[0]-120)*hpsx[5]
                     r += (p6[0]-120)*hpsx[6] + (p7[0]-120)*hpsx[7] + (p8[0]-120)*hpsx[8]
 
-                    r /= 9*9
+                    #r /= 9#*9
+                    #r = 0.5* ( p4[0]-120 )
 
-
-                    #
-                    p4 = diff.getpixel((x,     y))
-                    r = p4[0]-120
-                    #
-                
 
                     (a1,a2,a3) = high_res_image.getpixel((x - dx, y - dy))
                     a1 += r/k
@@ -100,13 +139,12 @@ def update_estimation(high_res_image, low_res_images, low_res_move, hps, k, f):
 
 def main():
     low_res_move = ( (-1, -1), (0, -1), (1, -1),
-                     (-1,  0), 
-                                (0,  0), (1,  0),
-                     (-1,  1),
-                                 (0,  1), (1,  1) )
+                     (-1,  0), (0,  0), (1,  0),
+                     (-1,  1), (0,  1), (1,  1) )
 
     iterations = 100
-    f = 3
+    f = 2
+    output_folder = 'input_samples'
 
     high_res_file = 'estimated.tif'
 
@@ -116,7 +154,7 @@ def main():
 
     logging.debug(hps)
 
-    get_image = lambda (x,y): ((x,y), Image.open('low_%d_%d.tif' % (x, y)))
+    get_image = lambda (x,y): ((x,y), Image.open('%s/@%d_%d.tif' % (output_folder, x, y)))
     low_res_images = map(get_image, low_res_move)
 
     base_for_estimation = low_res_images[0][1]
