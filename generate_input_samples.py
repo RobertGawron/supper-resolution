@@ -9,7 +9,6 @@ import Image
 import logging
 from optparse import OptionParser
 
-
 def take_a_photo(hi_res, offset, hps, f):
     size = hi_res.size
     lo = Image.new('RGB', size)
@@ -20,8 +19,8 @@ def take_a_photo(hi_res, offset, hps, f):
 
     for x in range(1, hi_res.size[0]-1):
         for y in range(1, hi_res.size[1]-1):
-            used_pixels = map(lambda (i,j): hi_res.getpixel((x+i, y+j)), mask)    
-            
+            used_pixels = map(lambda (i, j): hi_res.getpixel((x+i, y+j)), mask)
+ 
             (r, g, b) = (0, 0, 0)
             for (pixel, weight) in zip(used_pixels, hps):
                 (r, g, b) = (r + pixel[0] * weight, g + pixel[1] * weight, b + pixel[2] * weight) 
@@ -30,8 +29,9 @@ def take_a_photo(hi_res, offset, hps, f):
             (r, g, b) = (r/scale, g/scale, b/scale)
 
             lo.putpixel((x+offset[0], y+offset[1]), (r, g, b))
+           
 
-    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.LINEAR)
+    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.ANTIALIAS)
 
 
 
@@ -52,14 +52,15 @@ if __name__=="__main__":
     (s, high_res_file) = (int(opt.zoom), opt.from_image)
 
     low_res_move = ( (-1, -1), (0, -1), (1, -1),
-                     (-1,  0), (0,  0), (1,  0),
+                     (-1,  0), #(0,  0), 
+                     (1,  0),
                      (-1,  1), (0,  1), (1,  1) )
                     
     hps = ( 0.5, 1.0, 0.5, 
             1.0, 3.0, 1.0,
             0.5, 1.0, 0.5 )
 
-    output_folder = 'low_res_samples'
+    output_folder = 'input_samples'
 
     high_res_image = Image.open(high_res_file)
 
