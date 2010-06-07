@@ -8,6 +8,7 @@ import os
 import Image
 import logging
 from optparse import OptionParser
+import yaml
 
 def take_a_photo(hi_res, offset, hps, f):
     size = hi_res.size
@@ -38,40 +39,41 @@ def take_a_photo(hi_res, offset, hps, f):
 if __name__=="__main__":
     logging.basicConfig(level=logging.INFO)
 
+    default_config_file = 'image_configuration.yaml'
+    default_scale_value = 3
+
     parser = OptionParser('have a nice day')
-    parser.add_option('-z', '--zoom', dest='zoom', 
-                        help='zoom factor, natural number, greater from zero')
     parser.add_option('-i', '--image', dest='from_image', 
                         help='input file, in TIF format')
+    parser.add_option('-s', '--scale', dest='scale', 
+                        help='scale factor, natural number, greater from zero')
+    parser.add_option('-c', '--config', dest='config', 
+                        help='configuration file where constants are')
 
     (opt, args) = parser.parse_args()
+    
+    if not opt.scale:
+        opt.scale = default_scale_value
+ 
+    if not opt.config:
+        opt.config = default_config_file 
 
-    if not opt.zoom:
-        opt.zoom = 3 # default value if not provided from command line
+    scale, input_img, config_file = int(opt.scale), opt.from_image, opt.config
 
-    (s, high_res_file) = (int(opt.zoom), opt.from_image)
-
-    low_res_move = ( (-1, -1), (0, -1), (1, -1),
-                     (-1,  0), #(0,  0), 
-                     (1,  0),
-                     (-1,  1), (0,  1), (1,  1) )
-                    
-    hps = ( 0.5, 1.0, 0.5, 
-            1.0, 3.0, 1.0,
-            0.5, 1.0, 0.5 )
-
-    output_folder = 'input_samples'
-
-    high_res_image = Image.open(high_res_file)
+    config = open(config_file, 'r')
+    config = yaml.load(config)
+    logging.debug(config)
 
     try:
-        os.mkdir(output_folder)
+        os.mkdir(config['samples_folder'])
     except OSError:
-        pass
+        logging.debug('tried to create samples folder')
 
-    for (x, y) in low_res_move:
-        low_res_file_name = '%s/@%d_%d.tif' % (output_folder, x, y)
-        image = take_a_photo(high_res_image, (x, y), hps, s)
-        image.save(low_res_file_name)
-        logging.info('%15s saved' % low_res_file_name)
+    input_image = Image.open(input_img)
+
+    for (x, y) in config['offsets_of_captured_imgs']:
+        low_res_file = '%s/%d_%d.tif' % (config['samples_folder'], x, y)
+        image = take_a_photo(input_image, (x, y), config['psf'], scale)
+        image.save(low_res_file)
+        logging.info('%15s saved' % low_res_file)
 
