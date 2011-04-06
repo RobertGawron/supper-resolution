@@ -1,0 +1,25 @@
+I. REQUIREMENTS
+
+(1) python 2.x
+(2) PIL library
+(3) yaml library
+
+II. PROJECT SUBPARTS DESCRIPTION
+
+Project contains two parts:
+
+(1) create_input_samples.py - python script, that takes initial highr resolution image and
+produce series of low resolution images
+
+(2) sr_restore.py - python script, that takes series of low resolution images
+from (1) and estimates high resolution image by using one of SR algorithm
+
+There are plenty of factors, that aren't estimated in (2) instead they are just
+shared between (1) and (2), those factors are stored in config.yaml There is no
+need to modify this file.
+
+Samples that may be used to check results of presented implementation may be
+obtained from sample_images directory.
+
+III. CONTACT
+robert_gawron@yahoo.fr
