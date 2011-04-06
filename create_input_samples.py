@@ -42,13 +42,13 @@ if __name__=="__main__":
     default_config_file = 'config.yaml'
     default_scale_value = 3
 
-    parser = OptionParser('have a nice day')
+    parser = OptionParser('script name -i from_image [...]')
     parser.add_option('-i', '--image', dest='from_image', 
-                        help='input file, in TIF format')
+                        help='[REQUIRED] initial high resolution image, must be in TIF format')
     parser.add_option('-s', '--scale', dest='scale', 
-                        help='scale factor, natural number, greater from zero')
+                        help='[OPTIONAL] scale factor, natural number, greater from zero')
     parser.add_option('-c', '--config', dest='config', 
-                        help='configuration file where constants are')
+                        help='[OPTIONAL] path to configuration file')
 
     (opt, args) = parser.parse_args()
     
