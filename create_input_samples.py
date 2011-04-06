@@ -39,7 +39,7 @@ def take_a_photo(hi_res, offset, hps, f):
 if __name__=="__main__":
     logging.basicConfig(level=logging.INFO)
 
-    default_config_file = 'image_configuration.yaml'
+    default_config_file = 'config.yaml'
     default_scale_value = 3
 
     parser = OptionParser('have a nice day')
