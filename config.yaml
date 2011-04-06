@@ -5,7 +5,7 @@ psf: [0.5, 1.0, 0.5, 1.0, 3.0, 1.0, 0.5, 1.0, 0.5]
 
 # place, where we keep LR images used in SR reconstruction
 # if it doesn't exist then we will try to create this folder
-samples_folder: 'input_samples'
+samples_folder: 'input_low_res_images'
 
 # offset in (x,y) form for each low resolution image
 offsets_of_captured_imgs: [[-1, -1], [0, -1], [1, -1],
