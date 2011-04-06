@@ -1,18 +1,15 @@
-###### general usage variables #####
-
-# point spread function described as a flattened 3x3 array
+# point spread function stored as a flattened 3x3 array
 psf: [0.5, 1.0, 0.5, 1.0, 3.0, 1.0, 0.5, 1.0, 0.5]
 
-# place, where we keep LR images used in SR reconstruction
-# if it doesn't exist then we will try to create this folder
+# directory, where generated low resolution images are stored
 samples_folder: 'input_low_res_images'
 
-# offset in (x,y) form for each low resolution image
+# offset stored in (x,y) form for each low resolution image
 offsets_of_captured_imgs: [[-1, -1], [0, -1], [1, -1],
                            [-1,  0],          [1,  0],
                            [-1,  1], [0,  1], [1,  1]]
 
 
-##### variables specific to SR algorithm #####
-iterations: 100
+# number of iteration of SR algorithm
+iterations: 20
 
