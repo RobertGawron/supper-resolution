@@ -2,7 +2,7 @@ I. REQUIREMENTS
 
 (1) python 2.x
 (2) PIL library
-(3) yaml library
+(3) PyYAML library
 
 II. PROJECT SUBPARTS DESCRIPTION
 
@@ -21,5 +21,10 @@ need to modify this file.
 Samples that may be used to check results of presented implementation may be
 obtained from sample_images directory.
 
-III. CONTACT
+III. SAMPLE USAGE
+(1) creation of input images:
+create images from image in sample_images/sky.tif, downscaled by 2:
+    bash-3.2$ ./create_input_samples.py -i sample_images/sky.tif -s 2
+
+IV. CONTACT
 robert_gawron@yahoo.fr
