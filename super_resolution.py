@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-__author__ =  'Robert Gawron - http://rgawron.megiteam.pl'
+
+__author__ =  'Robert Gawron - http://robertgawron.blogspot.com/'
 __version__ =  '1.0'
 __licence__ = 'BSD licence'
 
