@@ -36,7 +36,7 @@ def take_a_photo(hi_res, offset, hps, f):
 
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     default_config_file = 'config.yaml'
