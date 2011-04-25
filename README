@@ -24,7 +24,22 @@ obtained from sample_images directory.
 III. SAMPLE USAGE
 (1) creation of input images:
 create images from image in sample_images/sky.tif, downscaled by 2:
-    bash-3.2$ ./create_input_samples.py -i sample_images/sky.tif -s 2
+    bash-3.2$ ./create_input_images.py sample_images/sky.tif -s 2
 
 IV. CONTACT
 robert_gawron@yahoo.fr
+
+V. CREDITS
+empty
+
+VI. HISTORY
+1.0 (04.2010):
+    - initial versions
+    - support for monochromatic images
+    - configuration through YAML file
+    - sample images
+1.1 (04.2011):
+    - support for RGB images
+    - cleaner code, messages, easer script's invocation
+    - added HOWTO file
+    - more sample images

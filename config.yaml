@@ -2,7 +2,7 @@
 psf: [0.5, 1.0, 0.5, 1.0, 3.0, 1.0, 0.5, 1.0, 0.5]
 
 # directory, where generated low resolution images are stored
-samples_folder: 'input_low_res_images'
+samples_folder: 'input_images'
 
 # offset stored in (x,y) form for each low resolution image
 offsets_of_captured_imgs: [[-1, -1], [0, -1], [1, -1],
@@ -11,5 +11,5 @@ offsets_of_captured_imgs: [[-1, -1], [0, -1], [1, -1],
 
 
 # number of iteration of SR algorithm
-iterations: 20
+iterations: 10
 

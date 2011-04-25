@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-
 __author__ =  'Robert Gawron - http://robertgawron.blogspot.com/'
-__version__ =  '1.0'
+__version__ =  '1.1'
 __licence__ = 'BSD licence'
 
 import math
@@ -38,6 +37,9 @@ def take_a_photo(hi_res, offset, hps, f):
 
 def update_estimation(high_res_image, captured_images, hps, k, s):
     error = 0
+    mask = ((-1, -1), (0, -1), (1, -1),
+            (-1,  0), (0,  0), (1,  0),
+            (-1,  1), (0,  1), (1,  1))
 
     for ((dx,dy), captured) in captured_images:
         simulated = take_a_photo(high_res_image, (dx, dy), hps, s)
@@ -48,51 +50,17 @@ def update_estimation(high_res_image, captured_images, hps, k, s):
             for y in range(2, simulated.size[1]-2):
                 (rc, gc, bc) = captured.getpixel((x, y))
                 (rs, gs, bs) = simulated.getpixel((x, y))
-                error += abs(rc - rs)
 
+                error += abs(rc - rs) + abs(gc - gs) + abs(bc - bs)
 
-                (rh, gh, bh) = high_res_image.getpixel((x-dx-1, y-dy-1))
-                rh += hps[0]*(rc-rs)/k
-                high_res_image.putpixel((x-dx-1, y-dy-1), (rh, rh, rh))
-
-                (rh, gh, bh) = high_res_image.getpixel((x-dx,   y-dy-1))
-                rh += hps[1]*(rc-rs)/k
-                high_res_image.putpixel((x-dx, y-dy-1), (rh, rh, rh))
-
-                (rh, gh, bh) = high_res_image.getpixel((x-dx+1,  y-dy-1))
-                rh += hps[2]*(rc-rs)/k
-                high_res_image.putpixel((x-dx+1, y-dy-1), (rh, rh, rh))
-
-
-
-                (rh, gh, bh) = high_res_image.getpixel((x-dx-1, y-dy))
-                rh += hps[3]*(rc-rs)/k
-                high_res_image.putpixel((x-dx-1, y-dy), (rh, rh, rh))
-
-                (rh, gh, bh) = high_res_image.getpixel((x-dx, y-dy))
-                rh += hps[4]*(rc-rs)/k
-                high_res_image.putpixel((x-dx, y-dy), (rh, rh, rh))
-
-                (rh, gh, bh) = high_res_image.getpixel((x-dx+1, y-dy))
-                rh += hps[5]*(rc-rs)/k
-                high_res_image.putpixel((x-dx+1, y-dy), (rh, rh, rh))
- 
-
-
-                (rh, gh, bh) = high_res_image.getpixel((x-dx-1, y-dy+1))
-                rh += hps[6]*(rc-rs)/k
-                high_res_image.putpixel((x-dx-1, y-dy+1), (rh, rh, rh))
-
-                (rh, gh, bh) = high_res_image.getpixel((x-dx, y-dy+1))
-                rh += hps[7]*(rc-rs)/k
-                high_res_image.putpixel((x-dx, y-dy+1), (rh, rh, rh))
-
-                (rh, gh, bh) = high_res_image.getpixel((x-dx+1, y-dy+1))
-                rh += hps[8]*(rc-rs)/k
-                high_res_image.putpixel((x-dx+1, y-dy+1), (rh, rh, rh))
-  
+                for (pfs_index, (dx, dy)) in zip(range(9), mask):
+                    (rh, gh, bh) = high_res_image.getpixel((x-dx-1, y-dy-1))
+                    rh += hps[pfs_index] * (rc - rs) / (k)
+                    gh += hps[pfs_index] * (gc - gs) / (k)
+                    bh += hps[pfs_index] * (bc - bs) / (k)
+                    high_res_image.putpixel((x-dx-1, y-dy-1), (rh, gh, bh))
+    
     return (error, high_res_image)
-
 
 
 if __name__=="__main__":
