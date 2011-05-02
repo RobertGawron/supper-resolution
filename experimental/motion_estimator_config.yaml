@@ -1,0 +1,6 @@
+# TODO this is a bit broken
+
+samples_directory: '../input_samples/'
+samples_name: ['s']
+samples_movment: [[0,0]]
+
