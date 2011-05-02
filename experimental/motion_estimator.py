@@ -8,16 +8,6 @@ import yaml
 import math
 import random
 
-class KnownInputEstimationTester:
-    """Take as input.."""
-    pass
-
-class UnknownInputEstimationTester:
-    def __init__(base_img, sample_imgs):
-        pass
-    def compare():
-        pass
-
 class MotionEstimator:
     def __init__(self, iteraions_per_check=9):
         self.iteraions_per_check = iteraions_per_check
@@ -64,6 +54,33 @@ class MotionEstimator:
 
         return x / iterations, y / iterations
 
+class EstimationTester:
+    def __init__(self, samples, estimator):
+        self.samples = samples 
+        self.estimator = estimator
+
+    def compare_known_movement(self, expectations):
+        results = {'total' : 0, 'image' : []}
+        for i in range(1, len(self.samples)):
+            x, y = self.estimator.estimate(self.samples[0], self.samples[i])
+            error = abs(x - expectations[i][0]) + abs(y - expectations[i][1])
+            img = {'expected' : expectations[i], 'computed':(x, y), 'error':error}
+            results['total'] += error
+            results['image'].append(img)
+        return results
+
+    def compare_unknown_movement(self):
+        results = {'total' : 0, 'image' : []}
+        for i in range(1, len(self.samples)):
+            pass
+            #x, y = self.estimator.estimate(self.samples[0], self.samples[i])
+            #error = abs(x - expectations[i][0]) + abs(y - expectations[i][1])
+            #img = {'expected' : expectations[i], 'computed':(x, y), 'error':error}
+            #results['total'] += error
+            #results['image'].append(img)
+        return results
+
+
 if __name__=="__main__":
     default_config_path = 'motion_estimator_config.yaml'
     config = open(default_config_path, 'r')
@@ -71,16 +88,8 @@ if __name__=="__main__":
 
     samples = map(lambda u: config['samples_directory'] +u, config['samples_names'])
     images = map(Image.open, samples)
-
     
-    estimator = MotionEstimator()
+    tester = EstimationTester(images, MotionEstimator())
+    print tester.compare_known_movement(config['samples_movments'])
+    print tester.compare_unknown_movement()
 
-    sum_of_errors = 0 
-    for i in range(1, len(samples)):
-        x, y = estimator.estimate(images[0], images[i])
-        expectation = config['samples_movments'][i]
-        error = abs(x - expectation[0]) + abs(y - expectation[1])
-        sum_of_errors += error
-        print "(%2d %2d) -> (%2d, %2d) %d" % (expectation[0], expectation[1], x, y, error)
-  
-    print "total: %d" % sum_of_errors 
