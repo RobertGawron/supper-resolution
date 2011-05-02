@@ -10,5 +10,5 @@ samples_names : ['0_0.tif', '0_-1.tif', '1_0.tif', '-1_-1.tif', '1_1.tif']
 
 # motion vectors for each image in samples_name, this is stored as pairs of movement in
 # horizontal and vertical directions. It's optional, useful for tests
-samples_movments : []
+samples_movments : [[0,0], [0,-1], [1,0], [-1,-1], [1,1]]
 

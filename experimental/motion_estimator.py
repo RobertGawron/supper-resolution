@@ -68,22 +68,19 @@ if __name__=="__main__":
     default_config_path = 'motion_estimator_config.yaml'
     config = open(default_config_path, 'r')
     config = yaml.load(config)
-    print config['samples_names']
- 
-    files = ['../input_images/0_0.tif', '../input_images/0_-1.tif',
-'../input_images/1_0.tif', '../input_images/-1_-1.tif', '../input_images/1_1.tif']
-    offsets = [(0,0), (0,-1), (1,0), (-1,-1), (1,1)]
 
-    images = map(Image.open, files)
-    #images = map(lambda x: x.resize((images[0].size[0]*2, images[1].size[0]*2)), images)
+    samples = map(lambda u: config['samples_directory'] +u, config['samples_names'])
+    images = map(Image.open, samples)
+
     
     estimator = MotionEstimator()
 
     sum_of_errors = 0 
-    for i in range(1, len(files)):
+    for i in range(1, len(samples)):
         x, y = estimator.estimate(images[0], images[i])
-        error = abs(x - offsets[i][0]) + abs(y - offsets[i][1])
+        expectation = config['samples_movments'][i]
+        error = abs(x - expectation[0]) + abs(y - expectation[1])
         sum_of_errors += error
-        print "(%2d %2d) -> (%2d, %2d) %d" % (offsets[i][0], offsets[i][1], x, y, error)
+        print "(%2d %2d) -> (%2d, %2d) %d" % (expectation[0], expectation[1], x, y, error)
   
     print "total: %d" % sum_of_errors 

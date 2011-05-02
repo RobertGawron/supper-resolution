@@ -5,8 +5,9 @@ psf: [0.5, 1.0, 0.5, 1.0, 3.0, 1.0, 0.5, 1.0, 0.5]
 samples_folder: 'input_images'
 
 # offset stored in (x,y) form for each low resolution image
+# XXX should we include [0,0] image here? I'm not sure 
 offsets_of_captured_imgs: [[-1, -1], [0, -1], [1, -1],
-                           [-1,  0],          [1,  0],
+                           [-1,  0], [0, 0],  [1,  0],
                            [-1,  1], [0,  1], [1,  1]]
 
 
