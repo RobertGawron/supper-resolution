@@ -1,30 +1,30 @@
-I. REQUIREMENTS
+I. REQUIRED SOFTWARE
 
 (1) python 2.x
 (2) PIL library
 (3) PyYAML library
 
-II. PROJECT SUBPARTS DESCRIPTION
+II. DESCRIPTION OF PROJECT'S PARTS
 
 Project contains two parts:
 
-(1) create_input_samples.py - python script, that takes initial highr resolution image and
-produce series of low resolution images
+(1) make_samples.py - python script, that takes initial highr resolution image and produce
+series of low resolution images
 
-(2) sr_restore.py - python script, that takes series of low resolution images
-from (1) and estimates high resolution image by using one of SR algorithm
+(2) sr_restore.py - python script, that takes series of low resolution images from (1) and
+estimates high resolution image by using one of SR algorithm
 
-There are plenty of factors, that aren't estimated in (2) instead they are just
-shared between (1) and (2), those factors are stored in config.yaml There is no
-need to modify this file.
+There are plenty of factors, that aren't estimated in (2) instead they are just shared
+between (1) and (2), those factors are stored in config.yaml There is no need to modify
+this file.
 
-Samples that may be used to check results of presented implementation may be
-obtained from sample_images directory.
+Samples that may be used to check results of presented implementation may be obtained from
+sample_images directory.
 
-III. SAMPLE USAGE
+III. EXAMPLES OF USAGE
 (1) creation of input images:
 create images from image in sample_images/sky.tif, downscaled by 2:
-    bash-3.2$ ./create_input_images.py sample_images/sky.tif -s 2
+    bash-3.2$ ./make_samples.py sample_images/sky.tif -s 2
 
 IV. CONTACT
 robert_gawron@yahoo.fr

@@ -7,14 +7,15 @@ import Image
 import math
 import random
 
-
 class KnownInputEstimationTester:
     """Take as input.."""
     pass
 
 class UnknownInputEstimationTester:
-    pass
-
+    def __init__(base_img, sample_imgs):
+        pass
+    def compare():
+        pass
 
 class MotionEstimator:
     def __init__(self, iteraions_per_check=9):
@@ -64,7 +65,8 @@ class MotionEstimator:
 
 if __name__=="__main__":
 
-    files = ['input_images/0_0.tif', 'input_images/0_-1.tif', 'input_images/1_0.tif', 'input_images/-1_-1.tif', 'input_images/1_1.tif']
+    files = ['../input_images/0_0.tif', '../input_images/0_-1.tif',
+'../input_images/1_0.tif', '../input_images/-1_-1.tif', '../input_images/1_1.tif']
     offsets = [(0,0), (0,-1), (1,0), (-1,-1), (1,1)]
 
     images = map(Image.open, files)
