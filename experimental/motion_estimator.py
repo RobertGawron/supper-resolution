@@ -1,15 +1,17 @@
 #!/usr/bin/env python
-# This is draft of motion estimator using motion block estimation algorithm
+__author__ =  'Robert Gawron - http://robertgawron.blogspot.com/'
+__version__ =  '0.1'
+__licence__ = 'FreeBSD License'
 import Image
 import math
 import random
 
 
-class TestEstimationKnownInput:
+class KnownInputEstimationTester:
     """Take as input.."""
     pass
 
-class TestEstimationUnknownInput:
+class UnknownInputEstimationTester:
     pass
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 __author__ =  'Robert Gawron - http://robertgawron.blogspot.com/'
 __version__ =  '1.1'
-__licence__ = 'BSD licence'
+__licence__ = 'FreeBSD License'
 
 import math
 import logging
