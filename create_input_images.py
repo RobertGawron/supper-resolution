@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-__author__ =  'Robert Gawron - http://robertgawron.blogspot.com/'
 __version__ =  '1.1'
 __licence__ = 'FreeBSD License'
+__author__ =  'Robert Gawron'
 
 import sys
 import os
