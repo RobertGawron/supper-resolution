@@ -4,6 +4,7 @@ __licence__ = 'FreeBSD License'
 __author__ =  'Robert Gawron'
 
 import Image
+import yaml
 import math
 import random
 
@@ -64,7 +65,11 @@ class MotionEstimator:
         return x / iterations, y / iterations
 
 if __name__=="__main__":
-
+    default_config_path = 'motion_estimator_config.yaml'
+    config = open(default_config_path, 'r')
+    config = yaml.load(config)
+    print config['samples_names']
+ 
     files = ['../input_images/0_0.tif', '../input_images/0_-1.tif',
 '../input_images/1_0.tif', '../input_images/-1_-1.tif', '../input_images/1_1.tif']
     offsets = [(0,0), (0,-1), (1,0), (-1,-1), (1,1)]

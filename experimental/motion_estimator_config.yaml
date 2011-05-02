@@ -1,6 +1,14 @@
-# TODO this is a bit broken
+# I'm not sure, if this a good idea, to provide data by config files, but anyways it's
+# better, that just set them in source, XXX is there any way to deploy strings like *jpg
+# to an array, that contains names of all jpg in given directory?
 
-samples_directory: '../input_samples/'
-samples_name: ['s']
-samples_movment: [[0,0]]
+# directory, where input images are
+samples_directory : '../input_images/'
+
+# names of input images
+samples_names : ['0_0.tif', '0_-1.tif', '1_0.tif', '-1_-1.tif', '1_1.tif']
+
+# motion vectors for each image in samples_name, this is stored as pairs of movement in
+# horizontal and vertical directions. It's optional, useful for tests
+samples_movments : []
 
