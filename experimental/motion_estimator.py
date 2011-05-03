@@ -70,14 +70,19 @@ class EstimationTester:
         return results
 
     def compare_unknown_movement(self):
+        width, height = self.samples[0].size
         results = {'total' : 0, 'image' : []}
         for i in range(1, len(self.samples)):
-            pass
-            #x, y = self.estimator.estimate(self.samples[0], self.samples[i])
-            #error = abs(x - expectations[i][0]) + abs(y - expectations[i][1])
-            #img = {'expected' : expectations[i], 'computed':(x, y), 'error':error}
-            #results['total'] += error
-            #results['image'].append(img)
+            difference = 0
+            dx, dy = self.estimator.estimate(self.samples[0], self.samples[i])
+            for x in range(abs(dx), width - abs(dx)):
+                for y in range(abs(dy), height - abs(dy)):
+                    p1 = images[0].getpixel((x, y))
+                    p2 = images[i].getpixel((x+dx, y+dy))
+                    difference += abs(p1[0] - p2[0])
+            img = {'error' : difference/width*height}
+            results['image'].append(img)
+            results['total'] += difference
         return results
 
 
