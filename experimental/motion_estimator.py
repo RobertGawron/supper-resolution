@@ -3,16 +3,16 @@ __version__ =  '0.1'
 __licence__ = 'FreeBSD License'
 __author__ =  'Robert Gawron'
 
-import Image
-import yaml
 import math
 import random
+import pprint
+import Image
+import yaml
 
 class MotionEstimator:
     def __init__(self, iteraions_per_check=9):
         self.iteraions_per_check = iteraions_per_check
         self.mask = ((0, 0), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))
- 
 
     def compute_offset(self, a, b, start_point):
         width, height = a.size
@@ -34,7 +34,6 @@ class MotionEstimator:
                 x, y = x_checked, y_checked
 
         return x - x_start, y - y_start
-
 
     def estimate(self, a, b):
         iterations=100
@@ -64,7 +63,7 @@ class EstimationTester:
         for i in range(1, len(self.samples)):
             x, y = self.estimator.estimate(self.samples[0], self.samples[i])
             error = abs(x - expectations[i][0]) + abs(y - expectations[i][1])
-            img = {'expected' : expectations[i], 'computed':(x, y), 'error':error}
+            img = {'expected' : expectations[i], 'computed' : (x, y), 'error' : error}
             results['total'] += error
             results['image'].append(img)
         return results
@@ -77,8 +76,8 @@ class EstimationTester:
             dx, dy = self.estimator.estimate(self.samples[0], self.samples[i])
             for x in range(abs(dx), width - abs(dx)):
                 for y in range(abs(dy), height - abs(dy)):
-                    p1 = images[0].getpixel((x, y))
-                    p2 = images[i].getpixel((x+dx, y+dy))
+                    p1 = images[0].getpixel((x + dx, y + dy))
+                    p2 = images[i].getpixel((x, y))
                     difference += abs(p1[0] - p2[0])
             img = {'error' : difference/width*height}
             results['image'].append(img)
@@ -90,11 +89,21 @@ if __name__=="__main__":
     default_config_path = 'motion_estimator_config.yaml'
     config = open(default_config_path, 'r')
     config = yaml.load(config)
-
+    # there is no need to use pretty printer here, it's only for better readability
+    screen = pprint.PrettyPrinter(indent=3, width=16)
+ 
     samples = map(lambda u: config['samples_directory'] +u, config['samples_names'])
     images = map(Image.open, samples)
+   
+    screen.pprint('** calculating movement, first image is base image **')
+    e = MotionEstimator()
+    base_img = images[0]
+    screen.pprint( map(lambda u: e.estimate(base_img, u), images[1:]) )
     
     tester = EstimationTester(images, MotionEstimator())
-    print tester.compare_known_movement(config['samples_movments'])
-    print tester.compare_unknown_movement()
+    screen.pprint('** checking estimation quality [known movement] **')
+    screen.pprint(tester.compare_known_movement(config['samples_movments']))
+
+    screen.pprint('** checking estimation quality [unknown movement] **')
+    screen.pprint(tester.compare_unknown_movement())
 
