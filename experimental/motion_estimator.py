@@ -9,50 +9,6 @@ import pprint
 import Image
 import yaml
 
-class MotionEstimator:
-    def __init__(self, iteraions_per_check=9):
-        self.iteraions_per_check = iteraions_per_check
-        self.mask = ((0, 0), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))
-
-    def compute_offset(self, a, b, start_point):
-        width, height = a.size
-        x_start, y_start = start_point
-        x, y = x_start, y_start 
-
-        p1, p2 = a.getpixel((x, y)), b.getpixel((x, y))
-        difference = abs(p1[0] - p2[0])
-        smalest_difference = difference
-
-        for i in range(self.iteraions_per_check):
-            p = i % len(self.mask)
-            x_checked, y_checked = x + self.mask[p][0], y + self.mask[p][1]
-            p1, p2 = a.getpixel((x, y)), b.getpixel((x_checked, y_checked))
-            difference = abs(p1[0] - p2[0])
-
-            if difference < smalest_difference:
-                smalest_difference = difference
-                x, y = x_checked, y_checked
-
-        return x - x_start, y - y_start
-
-    def estimate(self, a, b):
-        iterations=100
-
-        width, height = a.size
-        a = a.resize((width*2, height*2)) 
-        b = b.resize((width*2, height*2)) 
-
-        width, height = a.size
-        w = 4
-        x, y = 0, 0
-
-        for i in range(iterations):
-            p = random.randrange(w, width-w), random.randrange(w, height-w)
-            xn, yn = self.compute_offset(a, b, p)
-            x, y = x + xn, y + yn
-
-        return x / iterations, y / iterations
-
 class EstimationTester:
     def __init__(self, samples, estimator):
         self.samples = samples 
@@ -84,6 +40,50 @@ class EstimationTester:
             results['total'] += difference
         return results
 
+class MotionEstimator:
+    def __init__(self, iteraions_per_check=9):
+        self.iteraions_per_check = iteraions_per_check
+        self.mask = ((0, 0), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))
+
+    def compute_offset(self, a, b, start_point):
+        width, height = a.size
+        x_start, y_start = start_point
+        x, y = x_start, y_start 
+
+        p1, p2 = a.getpixel((x, y)), b.getpixel((x, y))
+        difference = abs(p1[0] - p2[0])
+        smalest_difference = difference
+
+        for i in range(self.iteraions_per_check):
+            p = i % len(self.mask)
+            x_checked, y_checked = x + self.mask[p][0], y + self.mask[p][1]
+            p1, p2 = a.getpixel((x, y)), b.getpixel((x_checked, y_checked))
+            difference = abs(p1[0] - p2[0])
+
+            if difference < smalest_difference:
+                smalest_difference = difference
+                x, y = x_checked, y_checked
+
+        return x - x_start, y - y_start
+
+    def estimate(self, a, b):
+        iterations = 100
+
+        #width, height = a.size
+        #a = a.resize((width*2, height*2)) 
+        #b = b.resize((width*2, height*2)) 
+
+        width, height = a.size
+        w = 4
+        x, y = 0, 0
+
+        for i in range(iterations):
+            p = random.randrange(w, width-w), random.randrange(w, height-w)
+            xn, yn = self.compute_offset(a, b, p)
+            x, y = x + xn, y + yn
+
+        return x / iterations, y / iterations
+
 
 if __name__=="__main__":
     default_config_path = 'motion_estimator_config.yaml'
@@ -94,16 +94,24 @@ if __name__=="__main__":
  
     samples = map(lambda u: config['samples_directory'] +u, config['samples_names'])
     images = map(Image.open, samples)
+    # is resizing needed? 
+    englargment = images[0].size[0] * 2, images[0].size[1] * 2
+    images = map(lambda u: u.resize(englargment), images)
    
     screen.pprint('** calculating movement, first image is base image **')
     e = MotionEstimator()
     base_img = images[0]
-    screen.pprint( map(lambda u: e.estimate(base_img, u), images[1:]) )
+
+    for i,j in zip(images[1:], config['samples_movments'][1:]):
+        results = e.estimate(base_img, i)
+        print results , j
+
+    """screen.pprint( map(lambda u: e.estimate(base_img, u), images[1:]) )
     
     tester = EstimationTester(images, MotionEstimator())
     screen.pprint('** checking estimation quality [known movement] **')
     screen.pprint(tester.compare_known_movement(config['samples_movments']))
 
     screen.pprint('** checking estimation quality [unknown movement] **')
-    screen.pprint(tester.compare_unknown_movement())
+    screen.pprint(tester.compare_unknown_movement())"""
 
