@@ -14,29 +14,30 @@ import yaml
 class Camera:
     def __init__(self, hps):
         self.hps = hps
-        mask = ((-1, -1), (0, -1), (1, -1),
-                (-1,  0), (0,  0), (1,  0),
-                (-1,  1), (0,  1), (1,  1))
+        self.mask = ((-1, -1), (0, -1), (1, -1),
+                     (-1,  0), (0,  0), (1,  0),
+                     (-1,  1), (0,  1), (1,  1))
 
     def take_a_photo(self, image, offset, downsize):
-        #low_res_size = image.size[0] / downsize, image.size[0] / downsize
         photo = Image.new('RGB', image.size)
 
         # apply hps and image movement
+        # TODO
         for x in range(0, image.size[0]):
             for y in range(0, image.size[1]):
-                involved_pixels = map(lambda (i, j): image.getpixel((x+i, y+j)), mask)
+                # compute weighted (by hps) mean of pixels, that contribute
+                involved_pixels = map(lambda (i, j): image.getpixel((x+i, y+j)), self.mask)
                 r, g, b = 0, 0, 0
-                for (pixel, weight) in zip(used_pixels, hps):
-                    r, g, b = r + pixel[0] * weight, g + pixel[1] * weight, b + pixel[2] * weight
-
+                
+                for ((ra, ga, ba), weight) in zip(used_pixels, hps):
+                    r, g, b = r + ra * weight, g + ga * weight, b + ba * weight
                 scale = len(used_pixels)
                 pixel = r / scale, g / scale, b / scale
-                print pixel
                 lo.putpixel((x + offset[0], y + offset[1]), pixel)
        
         # apply downsize factor        
-        return photo
+        downsize = image.size[0] / downsize, image.size[0] / downsize
+        return photo.resize(downsize)
 
     """size = hi_res.size
     lo = Image.new('RGB', size)
