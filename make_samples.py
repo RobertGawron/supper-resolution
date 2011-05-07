@@ -74,7 +74,10 @@ if __name__ == "__main__":
 
     input_image = Image.open(sys.argv[1])
     config = parse_config_file(opt.config)
-    os.mkdir(config['samples_folder'])
+
+    if not os.path.exists(config['samples_folder']):
+        os.mkdir(config['samples_folder'])
+
     camera = Camera(config['psf'])
 
     for (x, y) in config['offsets_of_captured_imgs']:
