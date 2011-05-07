@@ -22,58 +22,30 @@ class Camera:
         photo = Image.new('RGB', image.size)
 
         # apply hps and image movement
-        # TODO
-        for x in range(0, image.size[0]):
-            for y in range(0, image.size[1]):
+        w = 3 # TODO compute this!
+        for x in range(w, image.size[0]-w):
+            for y in range(w, image.size[1]-w):
                 # compute weighted (by hps) mean of pixels, that contribute
                 involved_pixels = map(lambda (i, j): image.getpixel((x+i, y+j)), self.mask)
                 r, g, b = 0, 0, 0
                 
-                for ((ra, ga, ba), weight) in zip(used_pixels, hps):
+                for ((ra, ga, ba), weight) in zip(involved_pixels, self.hps):
                     r, g, b = r + ra * weight, g + ga * weight, b + ba * weight
-                scale = len(used_pixels)
-                pixel = r / scale, g / scale, b / scale
-                lo.putpixel((x + offset[0], y + offset[1]), pixel)
+
+                scale = len(involved_pixels) # TODO this is broken!
+                pixel = int(r / scale), int(g / scale), int(b / scale)
+                photo.putpixel((x + offset[0], y + offset[1]), pixel)
        
-        # apply downsize factor        
-        downsize = image.size[0] / downsize, image.size[0] / downsize
+        # apply downsize factor
+        downsize = image.size[0] / downsize, image.size[1] / downsize
         return photo.resize(downsize)
 
-    """size = hi_res.size
-    lo = Image.new('RGB', size)
-
-    mask = ((-1, -1), (0, -1), (1, -1),
-            (-1,  0), (0,  0), (1,  0),
-            (-1,  1), (0,  1), (1,  1))
-
-    def put_pixel(x, y):
-        used_pixels = map(lambda (i, j): hi_res.getpixel((x+i, y+j)), mask)
-        r, g, b = 0, 0, 0
-        for (pixel, weight) in zip(used_pixels, hps):
-            r, g, b = r + pixel[0] * weight, g + pixel[1] * weight, b + pixel[2] * weight
-        scale = len(used_pixels)
-        pixel = map(lambda u: int(u / scale), [r, g, b])#r / scale, g / scale, b / scale
-        print pixel
-        lo.putpixel((x + offset[0], y + offset[1]), pixel)
- 
-    for x in range(1, hi_res.size[0]-1):
-        for y in range(1, hi_res.size[1]-1):
-            put_pixel(x, y)  
-
-    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f))#, Image.ANTIALIAS)"""
 
 def parse_config_file(config_path):
     config = open(config_path, 'r')
     config = yaml.load(config)
     logging.debug(config)
     return config
-
-def silent_mkdir(file_path):
-    """it's like mkdir(), but it does nothing if directory exists"""
-    try:
-        os.mkdir(file_path)
-    except OSError:
-        logging.debug('unable to create directory for samples')
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -102,13 +74,11 @@ if __name__ == "__main__":
 
     input_image = Image.open(sys.argv[1])
     config = parse_config_file(opt.config)
-    silent_mkdir(config['samples_folder'])
+    os.mkdir(config['samples_folder'])
     camera = Camera(config['psf'])
 
     for (x, y) in config['offsets_of_captured_imgs']:
         low_res_file = '%s/%d_%d.tif' % (config['samples_folder'], x, y)
         camera.take_a_photo(input_image, (x, y), opt.scale).save(low_res_file)
-        #image = take_a_photo(input_image, (x, y), config['psf'], opt.scale)
-        #image.save(low_res_file)
-        logging.info('%s saved' % low_res_file)
+        logging.info('saved: %s' % low_res_file)
 
