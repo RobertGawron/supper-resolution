@@ -48,7 +48,8 @@ class SuperResolutionImage:
                      (-1,  0), (0,  0), (1,  0),
                      (-1,  1), (0,  1), (1,  1))
 
-    def restore(images, upsize):   
+    def restore(high_res, images, upsize):
+        return high_res
     """def update_estimation(high_res_image, captured_images, hps, k, s):
         error = 0
         mask = ((-1, -1), (0, -1), (1, -1),
@@ -116,7 +117,7 @@ if __name__=="__main__":
     config = yaml.load(config)
     logging.debug(config)
 
-    sr_img = SuperResolutionImage:
+    sr_restorator = SuperResolutionImage()
  
     #load_image = lambda (x,y): ((x,y), Image.open('%s/%d_%d.tif' % (config['samples_folder'], x, y)))
     #captured_images = map(load_image, config['offsets_of_captured_imgs'])
