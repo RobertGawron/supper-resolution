@@ -20,12 +20,12 @@ def take_a_photo(hi_res, offset, hps, f):
 
     def put_pixel(x, y):
         used_pixels = map(lambda (i, j): hi_res.getpixel((x+i, y+j)), mask)
-        (r, g, b) = (0, 0, 0)
+        r, g, b = 0, 0, 0
         for (pixel, weight) in zip(used_pixels, hps):
-            (r, g, b) = (r + pixel[0] * weight, g + pixel[1] * weight, b + pixel[2] * weight) 
+            r, g, b = r + pixel[0] * weight, g + pixel[1] * weight, b + pixel[2] * weight
         scale = len(used_pixels)
-        (r, g, b) = (r/scale, g/scale, b/scale)
-        lo.putpixel((x + offset[0], y + offset[1]), (r, g, b))
+        pixel = r / scale, g / scale, b / scale
+        lo.putpixel((x + offset[0], y + offset[1]), pixel)
  
     for x in range(1, hi_res.size[0]-1):
         for y in range(1, hi_res.size[1]-1):
@@ -45,7 +45,7 @@ def silent_mkdir(file_path):
     try:
         os.mkdir(file_path)
     except OSError:
-        logging.debug('tried to create samples folder')
+        logging.debug('unable to create director for samples')
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
