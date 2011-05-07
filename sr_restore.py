@@ -10,28 +10,34 @@ from optparse import OptionParser
 import yaml
 
 
-def take_a_photo(hi_res, offset, hps, f):
-    size = hi_res.size
-    lo = Image.new('RGB', size)
+class Camera:
+    def __init__(self, hps):
+        self.hps = hps
+        self.mask = ((-1, -1), (0, -1), (1, -1),
+                     (-1,  0), (0,  0), (1,  0),
+                     (-1,  1), (0,  1), (1,  1))
 
-    mask = ((-1, -1), (0, -1), (1, -1),
-            (-1,  0), (0,  0), (1,  0),
-            (-1,  1), (0,  1), (1,  1))
+    def take_a_photo(self, image, offset, downsize):
+        photo = Image.new('RGB', image.size)
 
-    for x in range(1, hi_res.size[0]-1):
-        for y in range(1, hi_res.size[1]-1):
-            used_pixels = map(lambda (i, j): hi_res.getpixel((x+i, y+j)), mask)    
-            
-            (r, g, b) = (0, 0, 0)
-            for (pixel, weight) in zip(used_pixels, hps):
-                (r, g, b) = (r + pixel[0] * weight, g + pixel[1] * weight, b + pixel[2] * weight) 
+        # apply hps and image movement
+        w = 3 # TODO compute this!
+        for x in range(w, image.size[0]-w):
+            for y in range(w, image.size[1]-w):
+                # compute weighted (by hps) mean of pixels, that contribute
+                involved_pixels = map(lambda (i, j): image.getpixel((x+i, y+j)), self.mask)
+                r, g, b = 0, 0, 0
                 
-            scale = len(used_pixels)
-            (r, g, b) = (r/scale, g/scale, b/scale)
+                for ((ra, ga, ba), weight) in zip(involved_pixels, self.hps):
+                    r, g, b = r + ra * weight, g + ga * weight, b + ba * weight
 
-            lo.putpixel((x+offset[0], y+offset[1]), (r, g, b))
-
-    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.ANTIALIAS)
+                scale = len(involved_pixels) # TODO this is broken!
+                pixel = int(r / scale), int(g / scale), int(b / scale)
+                photo.putpixel((x + offset[0], y + offset[1]), pixel)
+       
+        # apply downsize factor
+        downsize = image.size[0] / downsize, image.size[1] / downsize
+        return photo.resize(downsize, Image.ANTIALIAS)
 
 
 
@@ -41,8 +47,9 @@ def update_estimation(high_res_image, captured_images, hps, k, s):
             (-1,  0), (0,  0), (1,  0),
             (-1,  1), (0,  1), (1,  1))
 
+    camera = Camera(hps)
     for ((dx,dy), captured) in captured_images:
-        simulated = take_a_photo(high_res_image, (dx, dy), hps, s)
+        simulated = camera.take_a_photo(high_res_image, (dx, dy), s)
         simulated = simulated.resize(high_res_image.size, Image.ANTIALIAS)
         captured = captured.resize(high_res_image.size, Image.ANTIALIAS)
 

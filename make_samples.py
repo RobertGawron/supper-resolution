@@ -38,7 +38,7 @@ class Camera:
        
         # apply downsize factor
         downsize = image.size[0] / downsize, image.size[1] / downsize
-        return photo.resize(downsize)
+        return photo.resize(downsize, Image.ANTIALIAS)
 
 
 def parse_config_file(config_path):
