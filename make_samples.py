@@ -31,7 +31,7 @@ def take_a_photo(hi_res, offset, hps, f):
         for y in range(1, hi_res.size[1]-1):
             put_pixel(x, y)  
 
-    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f), Image.ANTIALIAS)
+    return lo.resize((hi_res.size[0]/f, hi_res.size[1]/f))#, Image.ANTIALIAS)
 
 def parse_config_file(config_path):
     config = open(config_path, 'r')

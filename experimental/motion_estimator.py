@@ -66,20 +66,14 @@ class MotionEstimator:
 
         return x - x_start, y - y_start
 
-    def estimate(self, a, b):
-        iterations = 100
-
-        #width, height = a.size
-        #a = a.resize((width*2, height*2)) 
-        #b = b.resize((width*2, height*2)) 
-
-        width, height = a.size
-        w = 4
+    def estimate(self, base_img, checked_img, iterations=100):
+        width, height = base_img.size
+        w = 3 # TODO where this belongs?
         x, y = 0, 0
 
         for i in range(iterations):
-            p = random.randrange(w, width-w), random.randrange(w, height-w)
-            xn, yn = self.compute_offset(a, b, p)
+            point = random.randrange(w, width-w), random.randrange(w, height-w)
+            xn, yn = self.compute_offset(base_img, checked_img, point)
             x, y = x + xn, y + yn
 
         return x / iterations, y / iterations
@@ -92,7 +86,7 @@ if __name__=="__main__":
     # there is no need to use pretty printer here, it's only for better readability
     screen = pprint.PrettyPrinter(indent=3, width=16)
  
-    samples = map(lambda u: config['samples_directory'] +u, config['samples_names'])
+    samples = map(lambda u: config['samples_directory'] + u, config['samples_names'])
     images = map(Image.open, samples)
     # is resizing needed? 
     englargment = images[0].size[0] * 2, images[0].size[1] * 2
