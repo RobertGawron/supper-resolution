@@ -68,9 +68,9 @@ class SuperResolutionImage:
 
                     for (pfs_index, (dx, dy)) in zip(range(9), self.mask):
                         (rh, gh, bh) = high_res.getpixel((x - dx, y - dy))                       
-                        rh += self.hps[pfs_index] * (rc - rs) / k
-                        gh += self.hps[pfs_index] * (gc - gs) / k
-                        bh += self.hps[pfs_index] * (bc - bs) / k
+                        rh += int(self.hps[pfs_index] * (rc - rs) / k)
+                        gh += int(self.hps[pfs_index] * (gc - gs) / k)
+                        bh += int(self.hps[pfs_index] * (bc - bs) / k)
                         high_res.putpixel((x - dx, y - dy), (rh, gh, bh))
     
         return high_res, error
