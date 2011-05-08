@@ -48,8 +48,10 @@ class SuperResolutionImage:
                      (-1,  0), (0,  0), (1,  0),
                      (-1,  1), (0,  1), (1,  1))
 
-    def restore(high_res, images, upsize):
-        return high_res
+    def restore(self, high_res, images, upsize):
+        error = 0
+        
+        return high_res, error
     """def update_estimation(high_res_image, captured_images, hps, k, s):
         error = 0
         mask = ((-1, -1), (0, -1), (1, -1),
@@ -117,8 +119,27 @@ if __name__=="__main__":
     config = yaml.load(config)
     logging.debug(config)
 
-    sr_restorator = SuperResolutionImage()
+    sr_restorator = SuperResolutionImage(config['psf'])
  
+    input_images = []
+    
+    for (dx, dy) in config['offsets_of_captured_imgs']:
+        image = Image.open('%s/%d_%d.tif' % (config['samples_folder'], dx, dy))
+        input_images.append(((dx, dy), image))
+
+    high_res_image = input_images[0][1]#.resize(
+    k = 6
+    # TODO move this to separate class, that will check erorr of estimation
+    for i in range(config['iterations']):
+        high_res_image, error = sr_restorator.restore(high_res_image, input_images, scale)#, k, scale)
+        high_res_image.save('iteration_%d.tif' % i)
+        logging.info('iteration: %2d, estimation error: %3f' % (i, error))
+
+        #(error, high_res_image) = update_estimation(high_res_image, captured_images, config['psf'], k, scale)
+        #high_res_image.save('iteration.%d.tif' % iteration)
+        #error /=  float(k * high_res_image.size[0] * high_res_image.size[1])
+
+
     #load_image = lambda (x,y): ((x,y), Image.open('%s/%d_%d.tif' % (config['samples_folder'], x, y)))
     #captured_images = map(load_image, config['offsets_of_captured_imgs'])
 
