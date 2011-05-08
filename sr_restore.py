@@ -67,11 +67,11 @@ class SuperResolutionImage:
                     error += abs(rc - rs) + abs(gc - gs) + abs(bc - bs)
 
                     for (pfs_index, (dx, dy)) in zip(range(9), self.mask):
-                        (rh, gh, bh) = high_res.getpixel((x-dx-1, y-dy-1))
+                        (rh, gh, bh) = high_res.getpixel((x - dx, y - dy))                       
                         rh += self.hps[pfs_index] * (rc - rs) / k
                         gh += self.hps[pfs_index] * (gc - gs) / k
                         bh += self.hps[pfs_index] * (bc - bs) / k
-                        high_res.putpixel((x-dx-1, y-dy-1), (rh, gh, bh))
+                        high_res.putpixel((x - dx, y - dy), (rh, gh, bh))
     
         return high_res, error
 
@@ -115,7 +115,6 @@ if __name__=="__main__":
     high_res_image = input_images[0][1].resize(high_res_size, Image.ANTIALIAS)
 
     camera = Camera(config['psf'])
-
 
     # TODO move this to separate class, that will check error of estimation
     for i in range(config['iterations']):
