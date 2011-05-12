@@ -7,6 +7,7 @@ import math
 import random
 import pprint
 import Image
+import ImageOps
 import yaml
 
 class EstimationTester:
@@ -34,7 +35,7 @@ class EstimationTester:
                 for y in range(abs(dy), height - abs(dy)):
                     p1 = images[0].getpixel((x + dx, y + dy))
                     p2 = images[i].getpixel((x, y))
-                    difference += abs(p1[0] - p2[0])
+                    difference += abs(p1 - p2)
             img = {'error' : difference/width*height}
             results['image'].append(img)
             results['total'] += difference
@@ -51,14 +52,14 @@ class MotionEstimator:
         x, y = x_start, y_start 
 
         p1, p2 = a.getpixel((x, y)), b.getpixel((x, y))
-        difference = abs(p1[0] - p2[0])
+        difference = abs(p1 - p2)
         smalest_difference = difference
 
         for i in range(self.iteraions_per_check):
             p = i % len(self.mask)
             x_checked, y_checked = x + self.mask[p][0], y + self.mask[p][1]
             p1, p2 = a.getpixel((x, y)), b.getpixel((x_checked, y_checked))
-            difference = abs(p1[0] - p2[0])
+            difference = abs(p1 - p2)
 
             if difference < smalest_difference:
                 smalest_difference = difference
@@ -90,6 +91,9 @@ if __name__=="__main__":
     images = map(Image.open, samples)
     # is resizing needed? 
     englargment = images[0].size[0] * 2, images[0].size[1] * 2
+    # convert to grayscale
+    images = map(lambda u: ImageOps.grayscale(u), images)
+    # resize
     images = map(lambda u: u.resize(englargment), images)
    
     screen.pprint('** calculating movement, first image is base image **')

@@ -120,7 +120,7 @@ if __name__=="__main__":
     for i in range(config['iterations']):
         high_res_image, error = sr_restorator.restore(camera, high_res_image, input_images, scale)
         high_res_image.save('iteration_%d.tif' % i)
-        k_todo = 6
+        k_todo = 9
         error /=  float(k_todo * high_res_image.size[0] * high_res_image.size[1])
         logging.info('iteration: %2d, estimation error: %3f' % (i, error))
 
