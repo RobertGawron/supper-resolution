@@ -20,7 +20,7 @@ class EstimationTester:
         for i in range(1, len(self.samples)):
             x, y = self.estimator.estimate(self.samples[0], self.samples[i])
             error = abs(x - expectations[i][0]) + abs(y - expectations[i][1])
-            img = {'expected' : expectations[i], 'computed' : (x, y), 'error' : error}
+            img = {'expected' : expectations[i], 'estimated' : (x, y), 'error' : error}
             results['total'] += error
             results['image'].append(img)
         return results
@@ -44,13 +44,42 @@ class EstimationTester:
 class MotionEstimator:
     def __init__(self, iteraions_per_check=9):
         self.iteraions_per_check = iteraions_per_check
+        #self.mask = ((0, 0), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))
+        self.mask = ((-1, -1), (0, -1), (1, -1), 
+                     (-1,  0), (0,  0), (1,  0), 
+                     (-1,  1), (0,  1), (1,  1) )
+
+        self._mask = ((-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2), 
+                     (-2, -2), (-1, -1), (0, -1), (1, -1), (2, -1), 
+                     (-2, -2), (-1,  0), (0,  0), (1,  0), (2,  0), 
+                     (-2, -2), (-1,  1), (0,  1), (1,  1), (2,  1), 
+                     (-2, -2), (-1,  2), (0,  2), (1,  2), (2,  2), )
+
+        self._mask = (( 0,  0), ( 1,  0), (-1,  1), (0,  1), (1,  1), 
+                     (-1,  0), (-1, -1), (0, -1), (1, -1), (2, -1), 
+                     ( 2,  0), ( 2,  1), (2,  2), (1,  2), (0,  2), (-1, 2), 
+                        (-2, -2),(-2, -2), (-2, -2), (-2, -2), (-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2))
+
+
         self.mask = ((0, 0), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))
+    def compute_offset(self, a, b, (x, y)):
+        """# compute initial difference
+        p1, p2 = a.getpixel((x, y)), b.getpixel((x+self.mask[0][0], y+self.mask[0][1]))
+        difference = abs(p1 - p2)
+        smalest_difference = difference
+        estimation = self.mask[0] 
 
-    def compute_offset(self, a, b, start_point):
-        width, height = a.size
-        x_start, y_start = start_point
-        x, y = x_start, y_start 
+        for dx, dy in self.mask:
+            p1, p2 = a.getpixel((x, y)), b.getpixel((x + dx, y + dy))
+            difference = abs(p1 - p2)
+            if difference < smalest_difference:
+                smalest_difference = difference
+                estimation = (dx, dy) 
 
+        return estimation""" 
+
+        
+        x_start, y_start = x, y
         p1, p2 = a.getpixel((x, y)), b.getpixel((x, y))
         difference = abs(p1 - p2)
         smalest_difference = difference
@@ -69,7 +98,7 @@ class MotionEstimator:
 
     def estimate(self, base_img, checked_img, iterations=100):
         width, height = base_img.size
-        w = 3 # TODO where this belongs?
+        w = 5 # TODO where this belongs?
         x, y = 0, 0
 
         for i in range(iterations):
@@ -100,16 +129,16 @@ if __name__=="__main__":
     e = MotionEstimator()
     base_img = images[0]
 
-    for i,j in zip(images[1:], config['samples_movments'][1:]):
-        results = e.estimate(base_img, i)
-        print results , j
+    #for i,j in zip(images[1:], config['samples_movments'][1:]):
+    #    results = e.estimate(base_img, i)
+    #    print results , j
 
-    """screen.pprint( map(lambda u: e.estimate(base_img, u), images[1:]) )
+    screen.pprint( map(lambda u: e.estimate(base_img, u), images[1:]) )
     
     tester = EstimationTester(images, MotionEstimator())
     screen.pprint('** checking estimation quality [known movement] **')
     screen.pprint(tester.compare_known_movement(config['samples_movments']))
 
-    screen.pprint('** checking estimation quality [unknown movement] **')
-    screen.pprint(tester.compare_unknown_movement())"""
+    #screen.pprint('** checking estimation quality [unknown movement] **')
+    #screen.pprint(tester.compare_unknown_movement())
 
