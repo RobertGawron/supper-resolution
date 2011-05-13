@@ -1,45 +1,8 @@
-I. REQUIRED SOFTWARE
+For information about project visit:
 
-(1) Python 2.x
-(2) PIL
-(3) PyYAML
+https://github.com/RobertGawron/supper-resolution/wiki
 
-II. DESCRIPTION OF PROJECT'S PARTS
+For contact with author, send email to:
 
-Project contains two parts:
-
-(1) make_samples.py - python script, that takes initial highr resolution image and produce
-series of low resolution images
-
-(2) sr_restore.py - python script, that takes series of low resolution images from (1) and
-estimates high resolution image by using one of SR algorithm
-
-There are plenty of factors, that aren't estimated in (2) instead they are just shared
-between (1) and (2), those factors are stored in config.yaml There is no need to modify
-this file.
-
-Samples that may be used to check results of presented implementation may be obtained from
-sample_images directory.
-
-III. EXAMPLES OF USAGE
-(1) creation of input images:
-create images from image in sample_images/sky.tif, downscaled by 2:
-    bash-3.2$ ./make_samples.py sample_images/sky.tif -s 2
-
-IV. CONTACT
 robert_gawron@yahoo.fr
 
-V. CREDITS
-empty
-
-VI. HISTORY
-1.0 (04.2010):
-    - initial versions
-    - support for monochromatic images
-    - configuration through YAML file
-    - sample images
-1.1 (04.2011):
-    - support for RGB images
-    - cleaner code, messages, easer script's invocation
-    - added HOWTO file
-    - more sample images
