@@ -10,7 +10,6 @@ import logging
 from optparse import OptionParser
 import yaml
 
-
 class Camera:
     def __init__(self, hps):
         self.hps = hps
@@ -41,13 +40,21 @@ class Camera:
         return photo.resize(downsize, Image.ANTIALIAS)
 
 
-def parse_config_file(config_path):
-    config = open(config_path, 'r')
-    config = yaml.load(config)
-    logging.debug(config)
-    return config
 
-if __name__ == "__main__":
+def stub(input_image, downscale, config):
+    logging.basicConfig(level=logging.INFO)
+
+    if not os.path.exists(config['samples_folder']):
+        os.mkdir(config['samples_folder'])
+
+    camera = Camera(config['psf'])
+
+    for (x, y) in config['offsets_of_captured_imgs']:
+        low_res_file = '%s/%d_%d.tif' % (config['samples_folder'], x, y)
+        camera.take_a_photo(input_image, (x, y), downscale).save(low_res_file)
+        logging.info('saved: %s' % low_res_file)
+
+"""if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     default_config_path = 'config.yaml'
     default_scale_factor = 3
@@ -83,5 +90,5 @@ if __name__ == "__main__":
     for (x, y) in config['offsets_of_captured_imgs']:
         low_res_file = '%s/%d_%d.tif' % (config['samples_folder'], x, y)
         camera.take_a_photo(input_image, (x, y), opt.scale).save(low_res_file)
-        logging.info('saved: %s' % low_res_file)
+        logging.info('saved: %s' % low_res_file)"""
 

@@ -109,7 +109,7 @@ class MotionEstimator:
         return x / iterations, y / iterations
 
 
-if __name__=="__main__":
+def stub():
     default_config_path = 'motion_estimator_config.yaml'
     config = open(default_config_path, 'r')
     config = yaml.load(config)
@@ -141,4 +141,37 @@ if __name__=="__main__":
 
     #screen.pprint('** checking estimation quality [unknown movement] **')
     #screen.pprint(tester.compare_unknown_movement())
+
+"""if __name__=="__main__":
+    default_config_path = 'motion_estimator_config.yaml'
+    config = open(default_config_path, 'r')
+    config = yaml.load(config)
+    # there is no need to use pretty printer here, it's only for better readability
+    screen = pprint.PrettyPrinter(indent=3, width=16)
+ 
+    samples = map(lambda u: config['samples_directory'] + u, config['samples_names'])
+    images = map(Image.open, samples)
+    # is resizing needed? 
+    englargment = images[0].size[0] * 2, images[0].size[1] * 2
+    # convert to grayscale
+    images = map(lambda u: ImageOps.grayscale(u), images)
+    # resize
+    images = map(lambda u: u.resize(englargment), images)
+   
+    screen.pprint('** calculating movement, first image is base image **')
+    e = MotionEstimator()
+    base_img = images[0]
+
+    #for i,j in zip(images[1:], config['samples_movments'][1:]):
+    #    results = e.estimate(base_img, i)
+    #    print results , j
+
+    screen.pprint( map(lambda u: e.estimate(base_img, u), images[1:]) )
+    
+    tester = EstimationTester(images, MotionEstimator())
+    screen.pprint('** checking estimation quality [known movement] **')
+    screen.pprint(tester.compare_known_movement(config['samples_movments']))
+
+    #screen.pprint('** checking estimation quality [unknown movement] **')
+    #screen.pprint(tester.compare_unknown_movement())"""
 
