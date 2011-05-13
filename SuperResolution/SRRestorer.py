@@ -75,8 +75,40 @@ class SuperResolutionImage:
     
         return high_res, error
 
+def stub():
+    logging.basicConfig(level=logging.INFO)
 
-if __name__=="__main__":
+    config_file = 'config.yaml'
+    scale = 2
+
+
+    config = open(config_file, 'r')
+    config = yaml.load(config)
+
+    sr_restorator = SuperResolutionImage(config['psf'])
+ 
+    input_images = []
+    
+    for (dx, dy) in config['offsets_of_captured_imgs']:
+        image = Image.open('%s/%d_%d.tif' % (config['samples_folder'], dx, dy))
+        input_images.append(((dx, dy), image))
+
+    # TODO this is broken, use some data structure or class 
+    high_res_size = input_images[0][1].size[0] * scale, input_images[0][1].size[1] * scale
+    high_res_image = input_images[0][1].resize(high_res_size, Image.ANTIALIAS)
+
+    camera = Camera(config['psf'])
+
+    # TODO move this to separate class, that will check error of estimation
+    for i in range(config['iterations']):
+        high_res_image, error = sr_restorator.restore(camera, high_res_image, input_images, scale)
+        high_res_image.save('iteration_%d.tif' % i)
+        k_todo = 9
+        error /=  float(k_todo * high_res_image.size[0] * high_res_image.size[1])
+        logging.info('iteration: %2d, estimation error: %3f' % (i, error))
+
+
+"""if __name__=="__main__":
     logging.basicConfig(level=logging.INFO)
 
     default_config_file = 'config.yaml'
@@ -122,5 +154,5 @@ if __name__=="__main__":
         high_res_image.save('iteration_%d.tif' % i)
         k_todo = 9
         error /=  float(k_todo * high_res_image.size[0] * high_res_image.size[1])
-        logging.info('iteration: %2d, estimation error: %3f' % (i, error))
+        logging.info('iteration: %2d, estimation error: %3f' % (i, error))"""
 
