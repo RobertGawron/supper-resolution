@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__version__ =  '1.1'
+__version__ =  '2.0'
 __licence__ = 'FreeBSD License'
 __author__ =  'Robert Gawron'
 
@@ -10,19 +10,13 @@ import logging
 import Image
 import numpy
 
-##from optparse import OptionParser
-##import yaml
 
-
-##########################################################################################3
 ## helper function for matrix padding
 def do_padding(matrix, pwidth, pval=0):
     _pad = numpy.ones(pwidth) * pval
     return  numpy.apply_along_axis(lambda col:numpy.concatenate((_pad,col,_pad)), 0,
                                    numpy.apply_along_axis(lambda row:numpy.concatenate((_pad,row,_pad)), 1, matrix))
 
-
-##########################################################################################3
 class Camera:
     def __init__(self, hps):
         logging.info("Creating Camera Model")

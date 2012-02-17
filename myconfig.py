@@ -1,18 +1,25 @@
-# point spread function stored as a flattened 3x3 array
-#psf: [0.5, 1.0, 0.5, 1.0, 3.0, 1.0, 0.5, 1.0, 0.5]
-psf: [0.0, 0.0, 0.0, 0.0, 9.0, 0.0, 0.0, 0.0, 0.0]
 
+config = {
 
-# directory, where generated low resolution images are stored
-samples_folder: '/tmp/input_images'
+    # this is from original reconstruction python code by Robert Gawron
+    'psf1': [0.5, 1.0, 0.5,
+             1.0, 3.0, 1.0,
+             0.5, 1.0, 0.5],
+    
+    # this PSF is a 5x5 Gaussian
+    'psf':   [  2.66971863e-03,   5.36227322e-02,   1.45761699e-01,   5.36227322e-02,    2.66971863e-03,
+                5.36227322e-02,   1.07704137e+00,   2.92770198e+00,   1.07704137e+00,    5.36227322e-02,
+                1.45761699e-01,   2.92770198e+00,   7.95831909e+00,   2.92770198e+00,    1.45761699e-01,
+                5.36227322e-02,   1.07704137e+00,   2.92770198e+00,   1.07704137e+00,    5.36227322e-02,
+                2.66971863e-03,   5.36227322e-02,   1.45761699e-01,   5.36227322e-02,    2.66971863e-03 ],
 
-# offset stored in (x,y) form for each low resolution image
-# XXX should we include [0,0] image here? I'm not sure 
-offsets_of_captured_imgs: [[-2, -2], [0, -1], [1, -2],
-                           [-1,  0], [0, 0],  [1,  0],
-                           [-2,  1], [0,  1], [2,  1]]
+    
+    'offsets_of_captured_imgs' : [[0,0], [1,0], [2,0],
+                                  [0,1], [1,1], [2,1],
+                                  [0,2], [1,2], [2,2]],
 
-
-# number of iteration of SR algorithm
-iterations: 10
-
+    'scale'          : 2,
+    'iterations'     : 10,
+    'samples_folder' : './inputs/',
+    'output_folder'  : './output/'
+    }

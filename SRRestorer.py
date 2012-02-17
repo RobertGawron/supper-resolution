@@ -1,158 +1,135 @@
 #!/usr/bin/env python
-__version__ =  '1.1'
+__version__ =  '2.0'
 __licence__ = 'FreeBSD License'
 __author__ =  'Robert Gawron'
 
+import sys
+import os
 import math
 import logging
 import Image
-from optparse import OptionParser
-import yaml
+import numpy
+
+import myconfig
+import Camera
+
+import string
+import codecs
 
 
-class Camera:
-    def __init__(self, hps):
-        self.hps = hps
-        self.mask = ((-1, -1), (0, -1), (1, -1),
-                     (-1,  0), (0,  0), (1,  0),
-                     (-1,  1), (0,  1), (1,  1))
+def clipto_0(val): return val if val>0 else 0
+def clipto_255(val): return val if val<255 else 255
+def clip(val): return clipto_0(clipto_255(val))
+cliparray = numpy.frompyfunc(clip, 1, 1)
 
-    def take_a_photo(self, image, offset, downsize):
-        photo = Image.new('RGB', image.size)
-
-        # apply hps and image movement
-        w = 3 # TODO compute this!
-        for x in range(w, image.size[0]-w):
-            for y in range(w, image.size[1]-w):
-                # compute weighted (by hps) mean of pixels, that contribute
-                involved_pixels = map(lambda (i, j): image.getpixel((x+i, y+j)), self.mask)
-                r, g, b = 0, 0, 0
-                
-                for ((ra, ga, ba), weight) in zip(involved_pixels, self.hps):
-                    r, g, b = r + ra * weight, g + ga * weight, b + ba * weight
-
-                scale = len(involved_pixels) # TODO this is broken!
-                pixel = int(r / scale), int(g / scale), int(b / scale)
-                photo.putpixel((x + offset[0], y + offset[1]), pixel)
-       
-        # apply downsize factor
-        downsize = image.size[0] / downsize, image.size[1] / downsize
-        return photo.resize(downsize, Image.ANTIALIAS)
+# upsample an array with zeros
+def upsample(arr, n):
+    z = numpy.zeros((len(arr))) # upsample with values
+    for i in range(int(n-1)/2): arr = numpy.dstack((z,arr))
+    for i in range(int( n )/2): arr = numpy.dstack((arr,z))
+    return arr.reshape((1,-1))[0]
 
 
+def SRRestore(camera, high_res, images, upscale, iter): 
+    error = 0
+    captured_images = images
 
-class SuperResolutionImage:
-    def __init__(self, hps):
-        self.hps = hps
-        self.mask = ((-1, -1), (0, -1), (1, -1),
-                     (-1,  0), (0,  0), (1,  0),
-                     (-1,  1), (0,  1), (1,  1))
+    c = len(captured_images)
 
-    def restore(self, camera, high_res, images, upsize):
-        error = 0
-        captured_images = images
-        k = len(captured_images) # TDOO why is this here?
+    high_res_new = numpy.asarray(high_res).astype(numpy.float32)
 
-       
-        for ((dx,dy), captured) in captured_images:
-            simulated = camera.take_a_photo(high_res, (dx, dy), upsize)
-            simulated = simulated.resize(high_res.size, Image.ANTIALIAS)
-            captured = captured.resize(high_res.size, Image.ANTIALIAS)
+    # for every LR with known pixel-offset
+    for (offset, captured) in captured_images:
+        
+        (dx,dy) = offset
+        
+        # make LR of HR given current pixel-offset
+        simulated = camera.take_a_photo(high_res, offset, 1.0/upscale)
+        
+        # convert captured and simulated to numpy arrays (mind the data type!)
+        cap_arr = numpy.asarray(captured).astype(numpy.float32)
+        sim_arr = numpy.asarray(simulated).astype(numpy.float32)
 
-            for x in range(2, simulated.size[0]-2):
-                for y in range(2, simulated.size[1]-2):
-                    rc, gc, bc = captured.getpixel((x, y))
-                    rs, gs, bs = simulated.getpixel((x, y))
+        # get delta-image/array: captured - simulated
+        delta = (cap_arr - sim_arr) / c
 
-                    error += abs(rc - rs) + abs(gc - gs) + abs(bc - bs)
+        # Sum of Absolute Difference Error
+        error += numpy.sum(numpy.abs(delta))
 
-                    for (pfs_index, (dx, dy)) in zip(range(9), self.mask):
-                        (rh, gh, bh) = high_res.getpixel((x - dx, y - dy))                       
-                        rh += int(self.hps[pfs_index] * (rc - rs) / k)
-                        gh += int(self.hps[pfs_index] * (gc - gs) / k)
-                        bh += int(self.hps[pfs_index] * (bc - bs) / k)
-                        high_res.putpixel((x - dx, y - dy), (rh, gh, bh))
-    
-        return high_res, error
+        # upsample delta to HR size (with zeros)
+        delta_hr_R = numpy.apply_along_axis(lambda row: upsample(row,upscale),
+                                            1, numpy.apply_along_axis(lambda col: upsample(col,upscale),
+                                                                      0, delta[:,:,0]))
+
+        delta_hr_G = numpy.apply_along_axis(lambda row: upsample(row,upscale),
+                                            1, numpy.apply_along_axis(lambda col: upsample(col,upscale),
+                                                                      0, delta[:,:,1]))
+
+        delta_hr_B = numpy.apply_along_axis(lambda row: upsample(row,upscale),
+                                            1, numpy.apply_along_axis(lambda col: upsample(col,upscale),
+                                                                      0, delta[:,:,2]))
+        # apply the offset to the delta
+        delta_hr_R = camera.doOffset(delta_hr_R, (-dx,-dy))
+        delta_hr_G = camera.doOffset(delta_hr_G, (-dx,-dy))
+        delta_hr_B = camera.doOffset(delta_hr_B, (-dx,-dy))
+        
+        # Blur the (upsampled) delta with PSF
+        delta_hr_R = camera.Convolve(delta_hr_R)
+        delta_hr_G = camera.Convolve(delta_hr_G)
+        delta_hr_B = camera.Convolve(delta_hr_B)
+
+        # and update high_res image with filter result
+        high_res_new += numpy.dstack((delta_hr_R,
+                                      delta_hr_G,
+                                      delta_hr_B))
+
+    # normalize image array again (0-255)
+    high_res_new = cliparray(high_res_new)
+
+    return Image.fromarray(numpy.uint8(high_res_new)), error
+
 
 def stub():
     logging.basicConfig(level=logging.INFO)
 
-    config_file = 'config.yaml'
-    scale = 2
+    config = myconfig.config
+    print "config=", config
 
+    if not os.path.exists(config['output_folder']):
+        os.mkdir(config['output_folder'])
 
-    config = open(config_file, 'r')
-    config = yaml.load(config)
+    scale = config['scale']
 
-    sr_restorator = SuperResolutionImage(config['psf'])
- 
     input_images = []
     
+    camera = Camera.Camera(config['psf'])
+
     for (dx, dy) in config['offsets_of_captured_imgs']:
-        image = Image.open('%s/%d_%d.tif' % (config['samples_folder'], dx, dy))
+        fname = ('%s/S_%d_%d.tif' % (config['samples_folder'], dx, dy))
+        print "opening %s..." % fname
+        image = Image.open(fname)
         input_images.append(((dx, dy), image))
-
-    # TODO this is broken, use some data structure or class 
-    high_res_size = input_images[0][1].size[0] * scale, input_images[0][1].size[1] * scale
-    high_res_image = input_images[0][1].resize(high_res_size, Image.ANTIALIAS)
-
-    camera = Camera(config['psf'])
+    
+    # start value = sum(upsampled + shifted LR)
+    high_res_size  = [int(input_images[0][1].size[1] * scale), int(input_images[0][1].size[0] * scale), 3]
+    high_res_image = numpy.zeros(high_res_size).astype(numpy.float32)
+    for (offset, LR_img) in input_images:
+        HR_arr = numpy.asarray(LR_img.resize((high_res_size[1],high_res_size[0]), Image.ANTIALIAS))
+        high_res_image += numpy.dstack((camera.doOffset(HR_arr[:,:,0],(-dx,-dy)),
+                                        camera.doOffset(HR_arr[:,:,1],(-dx,-dy)),
+                                        camera.doOffset(HR_arr[:,:,2],(-dx,-dy))))
+    high_res_image = high_res_image / len(input_images) # take average value
+    high_res_image = Image.fromarray(numpy.uint8(high_res_image))
 
     # TODO move this to separate class, that will check error of estimation
     for i in range(config['iterations']):
-        high_res_image, error = sr_restorator.restore(camera, high_res_image, input_images, scale)
-        high_res_image.save('iteration_%d.tif' % i)
-        k_todo = 9
-        error /=  float(k_todo * high_res_image.size[0] * high_res_image.size[1])
+        high_res_image, error = SRRestore(camera, high_res_image, input_images, scale, i)
+        error /=  float(high_res_image.size[0] * high_res_image.size[1])
         logging.info('iteration: %2d, estimation error: %3f' % (i, error))
 
+    # save final reconstructed image
+    high_res_image.save('%s/Reconstructed.png' % (config['output_folder']))
 
-"""if __name__=="__main__":
-    logging.basicConfig(level=logging.INFO)
 
-    default_config_file = 'config.yaml'
-    default_scale_value = 2
-
-    parser = OptionParser()
-    parser.add_option('-s', '--scale', dest='scale', 
-                        help='scale factor, natural number, greater from zero')
-    parser.add_option('-c', '--config', dest='config', 
-                        help='configuration file where constants are')
-
-    (opt, args) = parser.parse_args()
-
-    if not opt.scale:
-        opt.scale = default_scale_value
- 
-    if not opt.config:
-        opt.config = default_config_file 
-
-    scale, config_file = int(opt.scale), opt.config
-
-    config = open(config_file, 'r')
-    config = yaml.load(config)
-    logging.debug(config)
-
-    sr_restorator = SuperResolutionImage(config['psf'])
- 
-    input_images = []
-    
-    for (dx, dy) in config['offsets_of_captured_imgs']:
-        image = Image.open('%s/%d_%d.tif' % (config['samples_folder'], dx, dy))
-        input_images.append(((dx, dy), image))
-
-    # TODO this is broken, use some data structure or class 
-    high_res_size = input_images[0][1].size[0] * scale, input_images[0][1].size[1] * scale
-    high_res_image = input_images[0][1].resize(high_res_size, Image.ANTIALIAS)
-
-    camera = Camera(config['psf'])
-
-    # TODO move this to separate class, that will check error of estimation
-    for i in range(config['iterations']):
-        high_res_image, error = sr_restorator.restore(camera, high_res_image, input_images, scale)
-        high_res_image.save('iteration_%d.tif' % i)
-        k_todo = 9
-        error /=  float(k_todo * high_res_image.size[0] * high_res_image.size[1])
-        logging.info('iteration: %2d, estimation error: %3f' % (i, error))"""
-
+if __name__=="__main__":    
+    stub()
