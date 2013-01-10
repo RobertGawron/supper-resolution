@@ -30,7 +30,7 @@ def upsample(arr, n):
     return arr.reshape((1,-1))[0]
 
 
-def SRRestore(camera, high_res, images, upscale, iter): 
+def SRRestore(camera, high_res, images, upscale, iter):
     error = 0
     captured_images = images
 
@@ -40,12 +40,12 @@ def SRRestore(camera, high_res, images, upscale, iter):
 
     # for every LR with known pixel-offset
     for (offset, captured) in captured_images:
-        
+
         (dx,dy) = offset
-        
+
         # make LR of HR given current pixel-offset
         simulated = camera.take_a_photo(high_res, offset, 1.0/upscale)
-        
+
         # convert captured and simulated to numpy arrays (mind the data type!)
         cap_arr = numpy.asarray(captured).astype(numpy.float32)
         sim_arr = numpy.asarray(simulated).astype(numpy.float32)
@@ -72,7 +72,7 @@ def SRRestore(camera, high_res, images, upscale, iter):
         delta_hr_R = camera.doOffset(delta_hr_R, (-dx,-dy))
         delta_hr_G = camera.doOffset(delta_hr_G, (-dx,-dy))
         delta_hr_B = camera.doOffset(delta_hr_B, (-dx,-dy))
-        
+
         # Blur the (upsampled) delta with PSF
         delta_hr_R = camera.Convolve(delta_hr_R)
         delta_hr_G = camera.Convolve(delta_hr_G)
@@ -101,7 +101,7 @@ def stub():
     scale = config['scale']
 
     input_images = []
-    
+
     camera = Camera.Camera(config['psf'])
 
     for (dx, dy) in config['offsets_of_captured_imgs']:
@@ -109,11 +109,12 @@ def stub():
         print "opening %s..." % fname
         image = Image.open(fname)
         input_images.append(((dx, dy), image))
-    
+
     # start value = sum(upsampled + shifted LR)
     high_res_size  = [int(input_images[0][1].size[1] * scale), int(input_images[0][1].size[0] * scale), 3]
     high_res_image = numpy.zeros(high_res_size).astype(numpy.float32)
     for (offset, LR_img) in input_images:
+        dx, dy = offset
         HR_arr = numpy.asarray(LR_img.resize((high_res_size[1],high_res_size[0]), Image.ANTIALIAS))
         high_res_image += numpy.dstack((camera.doOffset(HR_arr[:,:,0],(-dx,-dy)),
                                         camera.doOffset(HR_arr[:,:,1],(-dx,-dy)),
@@ -131,5 +132,5 @@ def stub():
     high_res_image.save('%s/Reconstructed.png' % (config['output_folder']))
 
 
-if __name__=="__main__":    
+if __name__=="__main__":
     stub()
