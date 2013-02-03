@@ -1,7 +1,9 @@
 #!/usr/bin/env python
+import sys
 import Image
 import math
 import random
+import logging
 
 def compute_offset(a, b, start_point):
     width, height = a.size
@@ -58,17 +60,15 @@ def compare_n_times(a, b, iterations):
     return x / iterations, y / iterations
 
 if __name__=="__main__":
-    files = ['input_images/00.jpg', 'input_images/11.jpg']
-    offsets = [(0,0), (3,3)]
+    logging.basicConfig(level=logging.INFO)
+
+    files = sys.argv[1], sys.argv[2]
+    offsets = [(0,0), (1,1)]
+    logging.info(files)
 
     images = map(Image.open, files)
     iterations = 20
 
-    sum_of_errors = 0 
-    for i in range(1, len(files)):
-        x, y = compare_n_times(images[0], images[i], iterations)
-        error = abs(x - offsets[i][0]) + abs(y - offsets[i][1])
-        sum_of_errors += error
-        print "(%2d %2d) -> (%2d, %2d) %d" % (offsets[i][0], offsets[i][1], x, y, error)
-  
-    print "total: %d" % sum_of_errors 
+    x, y = compare_n_times(images[0], images[1], iterations)
+    error = abs(x - offsets[1][0]) + abs(y - offsets[1][1])
+    print "(%2d %2d) -> (%2d, %2d) %d" % (offsets[1][0], offsets[1][1], x, y, error)
