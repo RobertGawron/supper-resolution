@@ -142,7 +142,7 @@ def stub():
     #screen.pprint('** checking estimation quality [unknown movement] **')
     #screen.pprint(tester.compare_unknown_movement())
 
-"""if __name__=="__main__":
+if __name__=="__main__":
     default_config_path = 'motion_estimator_config.yaml'
     config = open(default_config_path, 'r')
     config = yaml.load(config)
@@ -173,5 +173,5 @@ def stub():
     screen.pprint(tester.compare_known_movement(config['samples_movments']))
 
     #screen.pprint('** checking estimation quality [unknown movement] **')
-    #screen.pprint(tester.compare_unknown_movement())"""
+    #screen.pprint(tester.compare_unknown_movement())
 

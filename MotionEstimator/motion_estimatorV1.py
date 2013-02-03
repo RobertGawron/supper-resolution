@@ -31,7 +31,6 @@ def compute_offset(a, b, start_point):
             p1, p2 = a.getpixel((x, y)), b.getpixel((x_checked, y_checked))
             difference += abs(p1[0] - p2[0])
 
-            #print difference, (x_delta, y_delta)
             if first_check or smalest_difference >= difference:
                 first_check = False
                 smalest_difference = difference
@@ -61,9 +60,6 @@ def compare_n_times(a, b, iterations):
 if __name__=="__main__":
     files = ['input_images/00.jpg', 'input_images/11.jpg']
     offsets = [(0,0), (3,3)]
-
-    #files = ['input_images/0_0.tif', 'input_images/0_-1.tif', 'input_images/1_0.tif', 'input_images/-1_-1.tif', 'input_images/1_1.tif']
-    #offsets = [(0,0), (0,-1), (1,0), (-1,-1), (1,1)]
 
     images = map(Image.open, files)
     iterations = 20
