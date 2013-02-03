@@ -128,7 +128,6 @@ def stub():
         error /=  float(high_res_image.size[0] * high_res_image.size[1])
         logging.info('iteration: %2d, estimation error: %3f' % (i, error))
 
-    # save final reconstructed image
     high_res_image.save('%s/Reconstructed.png' % (config['output_folder']))
 
 
