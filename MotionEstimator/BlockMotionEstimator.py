@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+__version__ =  '1.0'
+__licence__ = 'FreeBSD License'
+__author__ =  'Robert Gawron'
 import sys
 import Image
 import math
