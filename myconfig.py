@@ -1,7 +1,7 @@
 
 config = {
 
-    # this is from original reconstruction python code by Robert Gawron
+    # this is from original reconstruction python code
     'psf1': [0.5, 1.0, 0.5,
              1.0, 3.0, 1.0,
              0.5, 1.0, 0.5],
