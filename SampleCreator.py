@@ -25,6 +25,6 @@ if __name__ == "__main__":
     for (x, y) in myconfig.config['offsets_of_captured_imgs']:
         low_res_file = '%s/S_%d_%d.tif' % (myconfig.config['samples_folder'], x, y)
         camera.take_a_photo(input_image, (x, y), downscale).save(low_res_file)
-        logging.info('Output image saved: %s' % low_res_file)
+        logging.info('Saved output image: %s' % low_res_file)
 
 
