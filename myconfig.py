@@ -20,6 +20,6 @@ config = {
 
     'scale'          : 2,
     'iterations'     : 10,
-    'samples_folder' : './inputs',
+    'samples_folder' : './input',
     'output_folder'  : './output'
     }
