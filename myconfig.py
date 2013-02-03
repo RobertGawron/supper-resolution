@@ -1,11 +1,8 @@
+__licence__ = 'FreeBSD License'
+__author__ =  'Robert Gawron'
+
 
 config = {
-
-    # this is from original reconstruction python code
-    'psf1': [0.5, 1.0, 0.5,
-             1.0, 3.0, 1.0,
-             0.5, 1.0, 0.5],
-
     # this PSF is a 5x5 Gaussian
     'psf':   [  2.66971863e-03,   5.36227322e-02,   1.45761699e-01,   5.36227322e-02,    2.66971863e-03,
                 5.36227322e-02,   1.07704137e+00,   2.92770198e+00,   1.07704137e+00,    5.36227322e-02,
