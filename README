@@ -1,12 +1,14 @@
 = INFO =
 
-For information about project visit:
+For information about the project please visit:
 
 https://github.com/RobertGawron/supper-resolution/wiki
 
-For contact with author, send email to:
+To contact with the author please send email:
 
-robert_gawron@yahoo.fr
+robert.gawron@mail.ru
 
 = CREDITS =
-Vanmeerbeeck Geert - various, major optimizations
+
+Vanmeerbeeck Geert - major optimizations
+xiaomo - fixed bug in file path
