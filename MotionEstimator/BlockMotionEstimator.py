@@ -28,14 +28,14 @@ def get_offset(a, b):
     y_start = random.randrange(frame, height - frame)
 
 
-    best_match = 0, 0
+    best_fit = 0, 0
     first_check = True
     smallest_difference = 0
 
     for (x_init, y_init) in mask:
         x, y = x_start + x_init, y_start + y_init
         difference = 0
-        local_best_match = 0, 0
+        local_best_fit = 0, 0
 
         for (x_delta, y_delta) in mask:
             x_checked, y_checked = x + x_delta, y + y_delta
@@ -45,29 +45,29 @@ def get_offset(a, b):
             if first_check or smallest_difference >= difference:
                 first_check = False
                 smallest_difference = difference
-                local_best_match = x_delta, y_delta
+                local_best_fit = x_delta, y_delta
 
-        best_match = best_match[0] + local_best_match[0], best_match[1] + local_best_match[1]
+        best_fit = best_fit[0] + local_best_fit[0], best_fit[1] + local_best_fit[1]
 
-    return best_match[0]/len(mask), best_match[1]/len(mask)
+    return best_fit[0]/len(mask), best_fit[1]/len(mask)
 
 
 if __name__=="__main__":
     logging.basicConfig(level=logging.INFO)
-    assert(len(sys.argv) == 3)
 
+    assert(len(sys.argv) == 3)
     files = sys.argv[1], sys.argv[2]
     logging.info(files)
 
     images = map(Image.open, files)
     assert(images[0].size == images[1].size)
 
-    samples_amount = 50# TODO magic number
-
     width, height = images[0].size
     images[0] = images[0].resize((width*2, height*2)) 
     images[1] = images[1].resize((width*2, height*2)) 
 
+    # the estimated movement is an average of many single checks
+    samples_amount = 50# TODO magic number
     x, y = 0, 0
     for i in range(samples_amount):
         xn, yn = get_offset(images[0], images[1])
