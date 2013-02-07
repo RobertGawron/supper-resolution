@@ -8,7 +8,7 @@ import math
 import random
 import logging
 
-def compute_offset(a, b, start_point):
+def get_offset(a, b, start_point):
     width, height = a.size
     x_start, y_start = start_point
 
@@ -24,7 +24,7 @@ def compute_offset(a, b, start_point):
 
     best_match = 0, 0
     first_check = True
-    smalest_difference = 0
+    smallest_difference = 0
 
     for (x_init, y_init) in mask:
         x, y = x_start + x_init, y_start + y_init
@@ -36,9 +36,9 @@ def compute_offset(a, b, start_point):
             p1, p2 = a.getpixel((x, y)), b.getpixel((x_checked, y_checked))
             difference += abs(p1[0] - p2[0])
 
-            if first_check or smalest_difference >= difference:
+            if first_check or smallest_difference >= difference:
                 first_check = False
-                smalest_difference = difference
+                smallest_difference = difference
                 local_best_match = x_delta, y_delta
 
         best_match = best_match[0] + local_best_match[0], best_match[1] + local_best_match[1]
@@ -57,7 +57,7 @@ def compare_n_times(a, b, iterations):
 
     for i in range(iterations):
         p = random.randrange(w, width-w), random.randrange(w, height-w)
-        xn, yn = compute_offset(a, b, p)
+        xn, yn = get_offset(a, b, p)
         x, y = x + xn, y + yn
 
     return x / iterations, y / iterations
@@ -66,12 +66,10 @@ if __name__=="__main__":
     logging.basicConfig(level=logging.INFO)
 
     files = sys.argv[1], sys.argv[2]
-    offsets = [(0,0), (1,1)]
     logging.info(files)
 
     images = map(Image.open, files)
     iterations = 20
 
     x, y = compare_n_times(images[0], images[1], iterations)
-    error = abs(x - offsets[1][0]) + abs(y - offsets[1][1])
-    print "(%2d %2d) -> (%2d, %2d) %d" % (offsets[1][0], offsets[1][1], x, y, error)
+    print "the offset between %s and %s is (%2d, %2d)" % (files[0], files[1], x, y)
