@@ -16,14 +16,9 @@ def get_offset(a, b):
             (-2,  1), (-1,  1), (0,  1), (1,  1), (2,  1),
             (-2, -2), (-1,  2), (0,  2), (1,  2), (2,  2))
 
-    mask1 = ((-1, -1), (0, -1), (1, -1),
-            (-1,  0), (0,  0), (1,  0),
-            (-1,  1), (0,  1), (1,  1))
-
-
 
     width, height = a.size
-    frame = 5#len(mask) # TODO is it needed?
+    frame = 10#len(mask) # TODO is it needed?
     x_start = random.randrange(frame, width - frame)
     y_start = random.randrange(frame, height - frame)
 
@@ -42,14 +37,15 @@ def get_offset(a, b):
             p1, p2 = a.getpixel((x, y)), b.getpixel((x_checked, y_checked))
             difference += abs(p1[0] - p2[0])
 
-            if first_check or smallest_difference >= difference:
+            if first_check or smallest_difference > difference:
                 first_check = False
                 smallest_difference = difference
                 local_best_fit = x_delta, y_delta
 
         best_fit = best_fit[0] + local_best_fit[0], best_fit[1] + local_best_fit[1]
 
-    return best_fit[0]/len(mask), best_fit[1]/len(mask)
+    return best_fit[0]/(len(mask) * 1.0), best_fit[1]/ (len(mask) * 1.0)
+
 
 
 if __name__=="__main__":
@@ -67,12 +63,15 @@ if __name__=="__main__":
     images[1] = images[1].resize((width*2, height*2)) 
 
     # the estimated movement is an average of many single checks
-    samples_amount = 50# TODO magic number
+    samples_amount = 100# TODO magic number
     x, y = 0, 0
     for i in range(samples_amount):
         xn, yn = get_offset(images[0], images[1])
         x, y = x + xn, y + yn
+        print xn,yn
 
+    print "--"
+    print x,y
     x, y = (x / samples_amount), (y / samples_amount)
 
     print "the offset between %s and %s is (%2d, %2d)" % (files[0], files[1], x, y)
