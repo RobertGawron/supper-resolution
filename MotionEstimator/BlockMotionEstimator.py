@@ -8,10 +8,8 @@ import math
 import random
 import logging
 
-def get_offset(a, b, start_point):
-    width, height = a.size
-    x_start, y_start = start_point
-
+def get_offset(a, b):
+ 
     mask = ((-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2),
             (-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1),
             (-2,  0), (-1,  0), (0,  0), (1,  0), (2,  0),
@@ -21,6 +19,14 @@ def get_offset(a, b, start_point):
     mask1 = ((-1, -1), (0, -1), (1, -1),
             (-1,  0), (0,  0), (1,  0),
             (-1,  1), (0,  1), (1,  1))
+
+
+
+    width, height = a.size
+    frame = 5#len(mask) # TODO is it needed?
+    x_start = random.randrange(frame, width - frame)
+    y_start = random.randrange(frame, height - frame)
+
 
     best_match = 0, 0
     first_check = True
@@ -46,30 +52,27 @@ def get_offset(a, b, start_point):
     return best_match[0]/len(mask), best_match[1]/len(mask)
 
 
-def compare_n_times(a, b, iterations):
-    width, height = a.size
-    a = a.resize((width*2, height*2)) 
-    b = b.resize((width*2, height*2)) 
-
-    width, height = a.size
-    w = 4
-    x, y = 0, 0
-
-    for i in range(iterations):
-        p = random.randrange(w, width-w), random.randrange(w, height-w)
-        xn, yn = get_offset(a, b, p)
-        x, y = x + xn, y + yn
-
-    return x / iterations, y / iterations
-
 if __name__=="__main__":
     logging.basicConfig(level=logging.INFO)
+    assert(len(sys.argv) == 3)
 
     files = sys.argv[1], sys.argv[2]
     logging.info(files)
 
     images = map(Image.open, files)
-    iterations = 20
+    assert(images[0].size == images[1].size)
 
-    x, y = compare_n_times(images[0], images[1], iterations)
+    samples_amount = 50# TODO magic number
+
+    width, height = images[0].size
+    images[0] = images[0].resize((width*2, height*2)) 
+    images[1] = images[1].resize((width*2, height*2)) 
+
+    x, y = 0, 0
+    for i in range(samples_amount):
+        xn, yn = get_offset(images[0], images[1])
+        x, y = x + xn, y + yn
+
+    x, y = (x / samples_amount), (y / samples_amount)
+
     print "the offset between %s and %s is (%2d, %2d)" % (files[0], files[1], x, y)
