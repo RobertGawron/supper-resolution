@@ -1,4 +1,0 @@
-samples_directory : '/tmp/input_images/'
-samples_names : ['-2_-2.tif', '0_-1.tif', '1_-2.tif']
-samples_movments :  [[-2, -2], [0, -1], [1, -2]]
-
