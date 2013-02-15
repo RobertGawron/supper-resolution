@@ -6,7 +6,6 @@ __author__ =  'Robert Gawron'
 import sys
 import os
 import math
-import logging
 import Image
 import numpy
 
@@ -90,10 +89,7 @@ def SRRestore(camera, high_res, images, upscale, iter):
 
 
 def stub():
-    logging.basicConfig(level=logging.INFO)
-
     config = myconfig.config
-    print "config=", config
 
     if not os.path.exists(config['output_folder']):
         os.mkdir(config['output_folder'])
@@ -126,7 +122,7 @@ def stub():
     for i in range(config['iterations']):
         high_res_image, error = SRRestore(camera, high_res_image, input_images, scale, i)
         error /=  float(high_res_image.size[0] * high_res_image.size[1])
-        logging.info('iteration: %2d, estimation error: %3f' % (i, error))
+        print 'iteration: %2d, estimation error: %3f' % (i, error)
 
     high_res_image.save('%s/reconstructed.png' % (config['output_folder']))
 
