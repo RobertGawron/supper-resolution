@@ -88,7 +88,8 @@ def SRRestore(camera, high_res, images, upscale, iter):
     return Image.fromarray(numpy.uint8(high_res_new)), error
 
 
-def stub():
+
+if __name__=="__main__":
     config = myconfig.config
 
     if not os.path.exists(config['output_folder']):
@@ -102,7 +103,6 @@ def stub():
 
     for (dx, dy) in config['offsets_of_captured_imgs']:
         fname = ('%s/S_%d_%d.tif' % (config['samples_folder'], dx, dy))
-        print "opening %s..." % fname
         image = Image.open(fname)
         input_images.append(((dx, dy), image))
 
@@ -118,7 +118,7 @@ def stub():
     high_res_image = high_res_image / len(input_images) # take average value
     high_res_image = Image.fromarray(numpy.uint8(high_res_image))
 
-    # TODO move this to separate class, that will check error of estimation
+    # TODO move this to separate class
     for i in range(config['iterations']):
         high_res_image, error = SRRestore(camera, high_res_image, input_images, scale, i)
         error /=  float(high_res_image.size[0] * high_res_image.size[1])
@@ -126,6 +126,3 @@ def stub():
 
     high_res_image.save('%s/reconstructed.png' % (config['output_folder']))
 
-
-if __name__=="__main__":
-    stub()
