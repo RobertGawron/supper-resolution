@@ -6,7 +6,6 @@ import sys
 import Image
 import math
 import random
-import logging
 
 def get_offset(a, b):
  
@@ -35,15 +34,13 @@ def get_offset(a, b):
             smallest_difference = difference
             best_fit = x_delta, y_delta
 
-    print best_fit
+    #print best_fit
     return best_fit
 
 if __name__=="__main__":
-    logging.basicConfig(level=logging.INFO)
 
     assert(len(sys.argv) == 3)
     files = sys.argv[1], sys.argv[2]
-    logging.info(files)
 
     images = map(Image.open, files)
     assert(images[0].size == images[1].size)
@@ -60,8 +57,8 @@ if __name__=="__main__":
         x, y = x + xn, y + yn
         #print xn,yn
 
-    print "--"
-    print x,y
+    #print "--"
+    #print x,y
     x, y = (x / samples_amount), (y / samples_amount)
 
     print "the offset between %s and %s is (%2d, %2d)" % (files[0], files[1], x, y)
