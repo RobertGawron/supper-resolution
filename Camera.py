@@ -43,9 +43,6 @@ class Camera:
         # convert to numpy array
         odata  = numpy.asarray(image).astype(numpy.int32)
 
-        if odata.ndim == 2: # BW/Gray images
-            odata = numpy.dstack((odata,odata,odata))
-
         # apply offset to HR image
         odata[:,:,0] = self.doOffset(odata[:,:,0], offset)
         odata[:,:,1] = self.doOffset(odata[:,:,1], offset)
