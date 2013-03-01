@@ -13,5 +13,4 @@ config = {
 
     'scale'          : 2,
     'iterations'     : 16,
-    'samples_folder' : './input'
 }
