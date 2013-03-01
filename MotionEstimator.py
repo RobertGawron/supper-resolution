@@ -45,7 +45,7 @@ class MotionEstimator:
                                 y_e += local_best_fit[1]
 
         normalize = 2.1
-        print checked, x_e*1.0/checked, y_e*1.0/checked
+        #print checked, x_e*1.0/checked, y_e*1.0/checked
 
         if checked == 0:
             return 0, 0

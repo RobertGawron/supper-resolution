@@ -98,6 +98,7 @@ if __name__=="__main__":
     samples_folder = sys.argv[1]
     config = myconfig.config
 
+    print "Estimate Motion Between Images"
     input_images = []
     for file in (os.listdir(samples_folder)):
         if file[-4:] != '.tif':
@@ -109,13 +110,13 @@ if __name__=="__main__":
         else:
             estimator = MotionEstimator(input_images[0][1], image)
             (x, y) = map(int, estimator.offset())
-            print file, x, y
+            print "%s: (%d, %d)" % (file, x, y)
             input_images.append(((x, y), image))
 
     scale = config['scale']
     camera = Camera.Camera(config['psf'])
 
-
+    print "Restore SR Image"
     # start value = sum(upsampled + shifted LR)
     high_res_size  = [int(input_images[0][1].size[1] * scale), int(input_images[0][1].size[0] * scale), 3]
     high_res_image = numpy.zeros(high_res_size).astype(numpy.float32)
