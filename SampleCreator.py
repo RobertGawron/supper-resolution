@@ -10,6 +10,10 @@ import myconfig
 import Camera
 
 if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print "usage: python %s input_file_name" % sys.argv[0]
+        sys.exit(0)
+
     offsets = [[0,0], [1,0], [2,0],
                [0,1], [1,1], [2,1],
                [0,2], [1,2], [2,2]]

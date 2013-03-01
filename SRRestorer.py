@@ -91,14 +91,19 @@ def SRRestore(camera, high_res, images, upscale, iter):
 
 
 if __name__=="__main__":
+    if len(sys.argv) != 2:
+        print "usage: python %s directory_with_input_images" % sys.argv[0]
+        sys.exit(0)
+
+    samples_folder = sys.argv[1]
     config = myconfig.config
 
-    #if not os.path.exists(config['output_folder']):
-    #    os.mkdir(config['output_folder'])
-
     input_images = []
-    for file in (os.listdir(config['samples_folder'])):
-        image = Image.open(config['samples_folder'] + '/' + file)
+    for file in (os.listdir(samples_folder)):
+        if file[-4:] != '.tif':
+            continue
+
+        image = Image.open(samples_folder + '/' + file)
         if not input_images:
             input_images.append(((0, 0), image))
         else:
