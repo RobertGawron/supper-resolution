@@ -132,7 +132,7 @@ if __name__=="__main__":
     for i in range(config['iterations']):
         high_res_image, error = SRRestore(camera, high_res_image, input_images, scale, i)
         error /=  float(high_res_image.size[0] * high_res_image.size[1])
-        print 'iteration: %2d, estimation error: %3f' % (i, error)
+        print '%2d: estimation error: %3f' % (i, error)
 
     high_res_image.save('super_resolution.tif')
 
