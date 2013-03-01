@@ -11,6 +11,7 @@ import numpy
 
 import myconfig
 import Camera
+from MotionEstimator import MotionEstimator
 
 import string
 import codecs
@@ -92,19 +93,23 @@ def SRRestore(camera, high_res, images, upscale, iter):
 if __name__=="__main__":
     config = myconfig.config
 
-    if not os.path.exists(config['output_folder']):
-        os.mkdir(config['output_folder'])
-
-    scale = config['scale']
+    #if not os.path.exists(config['output_folder']):
+    #    os.mkdir(config['output_folder'])
 
     input_images = []
+    for file in (os.listdir(config['samples_folder'])):
+        image = Image.open(config['samples_folder'] + '/' + file)
+        if not input_images:
+            input_images.append(((0, 0), image))
+        else:
+            estimator = MotionEstimator(input_images[0][1], image)
+            (x, y) = map(int, estimator.offset())
+            print file, x, y
+            input_images.append(((x, y), image))
 
+    scale = config['scale']
     camera = Camera.Camera(config['psf'])
 
-    for (dx, dy) in config['offsets_of_captured_imgs']:
-        fname = ('%s/S_%d_%d.tif' % (config['samples_folder'], dx, dy))
-        image = Image.open(fname)
-        input_images.append(((dx, dy), image))
 
     # start value = sum(upsampled + shifted LR)
     high_res_size  = [int(input_images[0][1].size[1] * scale), int(input_images[0][1].size[0] * scale), 3]
@@ -124,5 +129,5 @@ if __name__=="__main__":
         error /=  float(high_res_image.size[0] * high_res_image.size[1])
         print 'iteration: %2d, estimation error: %3f' % (i, error)
 
-    high_res_image.save('%s/reconstructed.png' % (config['output_folder']))
+    high_res_image.save('super_resolution.tif')
 

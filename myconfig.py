@@ -11,12 +11,7 @@ config = {
                 2.66971863e-03,   5.36227322e-02,   1.45761699e-01,   5.36227322e-02,    2.66971863e-03 ],
 
 
-    'offsets_of_captured_imgs' : [[0,0], [1,0], [2,0],
-                                  [0,1], [1,1], [2,1],
-                                  [0,2], [1,2], [2,2]],
-
     'scale'          : 2,
-    'iterations'     : 10,
-    'samples_folder' : './input',
-    'output_folder'  : './output'
-    }
+    'iterations'     : 16,
+    'samples_folder' : './input'
+}

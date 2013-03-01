@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__version__ =  '1.0'
+__version__ =  '1.1'
 __licence__ = 'FreeBSD License'
 __author__ =  'Robert Gawron'
 import sys
@@ -12,7 +12,7 @@ class MotionEstimator:
     def __init__(self, a, b):
         assert(a.size == b.size)
 
-        width, height = images[0].size
+        width, height = a.size
         a = a.resize((width*2, height*2), Image.ANTIALIAS) 
         b = b.resize((width*2, height*2), Image.ANTIALIAS) 
 
@@ -49,17 +49,30 @@ class MotionEstimator:
 
                             for (x_delta, y_delta) in self.offsets:
                                 p1 = self.a.getpixel((i, j))
-                                p2 = self.b.getpixel((i + x_delta, j + y_delta))
+                                p2 = self.b.getpixel((i   + x_delta, j   + y_delta))
 
                                 p3 = self.a.getpixel((i+1, j+1))
-                                p4 = self.b.getpixel((i + x_delta+1, j + y_delta+1))
+                                p4 = self.b.getpixel((i+1 + x_delta, j+1 + y_delta))
 
                                 p5 = self.a.getpixel((i-1, j-1))
-                                p6 = self.b.getpixel((i + x_delta-1, j + y_delta-1))
+                                p6 = self.b.getpixel((i-1 + x_delta, j-1 + y_delta))
+
+                                p7 = self.a.getpixel((i-1, j+1))
+                                p8 = self.b.getpixel((i-1 + x_delta, j+1 + y_delta))
+
+                                p9 = self.a.getpixel((i+1, j-1))
+                                p10 = self.b.getpixel((i+1 + x_delta, j-1 + y_delta))
 
 
 
-                                difference = abs(p1 - p2) + abs(p3 - p4) + abs(p5-p6)# TODO RGB
+                                p11 = self.a.getpixel((i, j-1))
+                                p12 = self.b.getpixel((i + x_delta, j-1 + y_delta))
+
+                                p13 = self.a.getpixel((i+1, j))
+                                p14 = self.b.getpixel((i+1 + x_delta, j + y_delta))
+
+
+                                difference = abs(p1 - p2) + abs(p3 - p4) + abs(p5-p6) + abs(p7-p8) + abs(p9-p10)  + abs(p11-p12) + abs(p13-p14) # TODO RGB
     
                                 if first_check or smallest_difference > difference:
                                     first_check = False
