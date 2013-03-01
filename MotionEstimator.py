@@ -25,12 +25,10 @@ class MotionEstimator:
     def offset(self):
         frame = 20+ 3 # (number of collumns - 1) / 2
         width, height = self.a.size
-        step = 1
 
         checked = 0
         x_e, y_e = 0, 0
 
-        checked_point = 0
         for offset in [1,2,3,4,5,6]:
             for i in range(3+offset, width-3):
                 for j in range(3, height - 3):
@@ -41,47 +39,11 @@ class MotionEstimator:
                             reference += self.a.getpixel((i + x, j + y))
 
                         if reference < 8 and reference > 3:
-                            #localIsChecked, localBestFit = self._get_pixel_offset(i, j)
-                            # todo move to a separate method
-                            best_fit = (0,0) 
-                            first_check = True
-                            smallest_difference = (123, 0)
-
-                            for (x_delta, y_delta) in self.offsets:
-                                p1 = self.a.getpixel((i, j))
-                                p2 = self.b.getpixel((i   + x_delta, j   + y_delta))
-
-                                p3 = self.a.getpixel((i+1, j+1))
-                                p4 = self.b.getpixel((i+1 + x_delta, j+1 + y_delta))
-
-                                p5 = self.a.getpixel((i-1, j-1))
-                                p6 = self.b.getpixel((i-1 + x_delta, j-1 + y_delta))
-
-                                p7 = self.a.getpixel((i-1, j+1))
-                                p8 = self.b.getpixel((i-1 + x_delta, j+1 + y_delta))
-
-                                p9 = self.a.getpixel((i+1, j-1))
-                                p10 = self.b.getpixel((i+1 + x_delta, j-1 + y_delta))
-
-
-
-                                p11 = self.a.getpixel((i, j-1))
-                                p12 = self.b.getpixel((i + x_delta, j-1 + y_delta))
-
-                                p13 = self.a.getpixel((i+1, j))
-                                p14 = self.b.getpixel((i+1 + x_delta, j + y_delta))
-
-
-                                difference = abs(p1 - p2) + abs(p3 - p4) + abs(p5-p6) + abs(p7-p8) + abs(p9-p10)  + abs(p11-p12) + abs(p13-p14) # TODO RGB
-    
-                                if first_check or smallest_difference > difference:
-                                    first_check = False
-                                    smallest_difference = difference
-                                    if not first_check:
-                                        checked +=1
-                                        x_e += x_delta
-                                        y_e += y_delta
-                                        best_fit = (x_delta, y_delta)
+                            local_best_fit = self._get_pixel_offset(i, j)
+                            if local_best_fit:
+                                checked +=1
+                                x_e += local_best_fit[0]
+                                y_e += local_best_fit[1]
 
                     else:
                         break 
@@ -95,33 +57,43 @@ class MotionEstimator:
 
 
     def _get_pixel_offset(self, i, j):
-        checked = 0
+        # todo move to a separate method
         best_fit = (0,0) 
         first_check = True
         smallest_difference = (123, 0)
 
         for (x_delta, y_delta) in self.offsets:
             p1 = self.a.getpixel((i, j))
-            p2 = self.b.getpixel((i + x_delta, j + y_delta))
+            p2 = self.b.getpixel((i   + x_delta, j   + y_delta))
 
             p3 = self.a.getpixel((i+1, j+1))
-            p4 = self.b.getpixel((i + x_delta+1, j + y_delta+1))
+            p4 = self.b.getpixel((i+1 + x_delta, j+1 + y_delta))
 
             p5 = self.a.getpixel((i-1, j-1))
-            p6 = self.b.getpixel((i + x_delta-1, j + y_delta-1))
+            p6 = self.b.getpixel((i-1 + x_delta, j-1 + y_delta))
 
-            difference = abs(p1 - p2) + abs(p3 - p4) + abs(p5-p6)# TODO RGB
-    
+            p7 = self.a.getpixel((i-1, j+1))
+            p8 = self.b.getpixel((i-1 + x_delta, j+1 + y_delta))
+
+            p9 = self.a.getpixel((i+1, j-1))
+            p10 = self.b.getpixel((i+1 + x_delta, j-1 + y_delta))
+
+            p11 = self.a.getpixel((i, j-1))
+            p12 = self.b.getpixel((i + x_delta, j-1 + y_delta))
+
+            p13 = self.a.getpixel((i+1, j))
+            p14 = self.b.getpixel((i+1 + x_delta, j + y_delta))
+
+
+            difference = abs(p1 - p2) + abs(p3 - p4) + abs(p5-p6) + abs(p7-p8) + abs(p9-p10)  + abs(p11-p12) + abs(p13-p14) # TODO RGB
+
             if first_check or smallest_difference > difference:
                 first_check = False
                 smallest_difference = difference
                 if not first_check:
-                    checked +=1
-                    x_e += x_delta
-                    y_e += y_delta
                     best_fit = (x_delta, y_delta)
 
-        return checked, best_fit
+        return best_fit
 
     """offsets = ((-2, -2), (-1, -2), (0, -2), (1, -2), (2, -2),
                (-2, -1), (-1, -1), (0, -1), (1, -1), (2, -1),
