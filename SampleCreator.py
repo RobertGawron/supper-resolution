@@ -6,7 +6,7 @@ __author__ =  'Robert Gawron'
 import sys
 import os
 from PIL import Image
-import myconfig
+from srconfig import cfg
 import Camera
 
 
@@ -23,8 +23,8 @@ def mkdirOutput(directory):
         os.mkdir(directory)
 
 def createSamples(image, outDirectory):
-    camera = Camera.Camera(myconfig.config['psf'])
-    downscale = 1.0 / myconfig.config['scale']
+    camera = Camera.Camera(cfg['psf'])
+    downscale = 1.0 / cfg['scale']
 
     # TODO move it somewhere
     offsets = [[0,0], [1,0], [2,0],

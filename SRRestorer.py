@@ -9,7 +9,7 @@ import math
 from PIL import Image
 import numpy
 
-import myconfig
+from srconfig import cfg
 import Camera
 from MotionEstimator import MotionEstimator
 
@@ -147,9 +147,9 @@ if __name__=="__main__":
     samples = loadSamples(sampleDirectory)
 
     print ("Restore SR Image")
-    camera = Camera.Camera(myconfig.config['psf'])
+    camera = Camera.Camera(cfg['psf'])
    
-    scale = myconfig.config['scale'] 
+    scale = cfg['scale'] 
     origSizeX = samples[0][1].size[1] * scale 
     origSizeY = samples[0][1].size[0] * scale
     origImage = numpy.zeros([origSizeX, origSizeY, 3]).astype(numpy.float32)
@@ -168,7 +168,7 @@ if __name__=="__main__":
     origImage = Image.fromarray(numpy.uint8(origImage))
 
     # TODO move this to a separate class
-    for i in range(myconfig.config['iterations']):
+    for i in range(cfg['iterations']):
         origImage, estimDiff = SRRestore(camera, origImage, samples, scale, i)
         #estimDiff = 5
         estimDiff /=  float(origSizeX * origSizeY)
