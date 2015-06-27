@@ -6,7 +6,7 @@ __author__ =  'Robert Gawron'
 import sys
 import os
 import math
-import Image
+from PIL import Image
 import numpy
 
 
@@ -18,7 +18,7 @@ def do_padding(matrix, pwidth, pval=0):
 
 class Camera:
     def __init__(self, hps):
-        print 'Creating Camera Model'
+        print('Creating Camera Model')
 
         # hps converted to 1D list
         self.hps  = numpy.array(hps).reshape(-1).tolist()
