@@ -1,4 +1,4 @@
-# a script for printing a chart with changes of the error estimation in each iteration
+# print a chart with estimation errors for each iteration
 
 # usage:
 #
@@ -21,5 +21,5 @@ set xlabel "iteration"
 set ylabel "error"
 unset key 
 
-# it's 12, because the script prints also other things, we need to skip them 
+# plot and skip some data (TODO why I added 12 here?) 
 plot "error.log" every ::12
