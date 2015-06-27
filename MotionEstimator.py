@@ -3,7 +3,7 @@ __version__ =  '1.1'
 __licence__ = 'FreeBSD License'
 __author__ =  'Robert Gawron'
 import sys
-import Image
+from PIL import Image
 import math
 import random
 
@@ -94,5 +94,5 @@ if __name__=="__main__":
     estimator = MotionEstimator(images[0], images[1])
     (x, y) = estimator.offset()
 
-    print "the offset between %s and %s is (%2d, %2d)" % (files[0], files[1], x, y)
+    print("the offset between %s and %s is (%2d, %2d)" % (files[0], files[1], x, y))
 
