@@ -8,7 +8,7 @@ import os
 from PIL import Image
 from srconfig import cfg
 import Camera
-
+from SRImage import SRImage
 
 def showHelp():
     print("usage: python3 [script name] SAMPLE OUTPUT_DIRCTORY")
@@ -33,7 +33,7 @@ def createSamples(image, outDirectory):
 
     for (x, y) in offsets:
         sampleFileName = '%s/S_%d_%d.tif' % (outDirectory, x, y)
-        camera.take_a_photo(image, (x, y), downscale).save(sampleFileName)
+        camera.take_a_photo(image.toLibImgType(), (x, y), downscale).save(sampleFileName)
         print('Sample created: %s' % sampleFileName)
 
 
@@ -44,8 +44,9 @@ if __name__ == "__main__":
 
     inImageFileName, outDirName = sys.argv[1], sys.argv[2]
 
-    inImage = Image.open(inImageFileName)
-    inImageSize = inImage.size[0], inImage.size[1]
+    inImage = SRImage()
+    inImage.openFromFile(inImageFileName)
+    inImageSize = inImage.w, inImage.h
     print('Input image size: %dx%d' % inImageSize)
     
     mkdirOutput(outDirName)
