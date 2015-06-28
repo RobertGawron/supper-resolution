@@ -33,7 +33,9 @@ def createSamples(image, outDirectory):
 
     for (x, y) in offsets:
         sampleFileName = '%s/S_%d_%d.tif' % (outDirectory, x, y)
-        camera.take_a_photo(image.toLibImgType(), (x, y), downscale).save(sampleFileName)
+        sample = SRImage()
+        sample.openFromLibImg(camera.take_a_photo(image.toLibImgType(), (x, y), downscale))
+        sample.save(sampleFileName)
         print('Sample created: %s' % sampleFileName)
 
 
