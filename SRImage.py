@@ -3,13 +3,12 @@ __version__ =  '2.1'
 __licence__ = 'FreeBSD License'
 __author__ =  'Robert Gawron'
 
-import sys
-import os
 from PIL import Image
-from srconfig import cfg
 import Camera
 
-
+"""
+    Abstraction of an image, later it will a wrapper for C module.
+"""
 class SRImage:
     def __init__(self):
         pass
