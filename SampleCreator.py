@@ -19,6 +19,15 @@ def showHelp():
     print("")
     print("Note: be sure to run the script with Python3 interpreter.") 
 
+def parseCmdArgs(arguments, config):
+    inImageFileName = arguments[1]
+    outDirName = config['inputImageDirectory']
+
+    if (len(arguments) == 3):
+        outDirName = arguments[2]
+
+    return inImageFileName, outDirName  
+
 def mkdirOutput(directory):
     if not os.path.exists(directory):
         os.mkdir(directory)
@@ -45,12 +54,7 @@ if __name__ == "__main__":
         showHelp();
         sys.exit(0)
 
-    inImageFileName = sys.argv[1]
-    outDirName = cfg['inputImageDirectory'] 
-
-
-    if (len(sys.argv) == 3):
-        outDirName = sys.argv[2]
+    inImageFileName, outDirName = parseCmdArgs(sys.argv, cfg)
 
     inImage = SRImage()
     inImage.openFromFile(inImageFileName)
