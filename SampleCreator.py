@@ -28,8 +28,7 @@ def createSamples(image, outDirectory):
 
 
 def mkdirOutput(directory):
-    if not os.path.exists(directory):
-        os.mkdir(directory)
+        os.makedirs(directory, exist_ok = True)
 
 
 def showHelp():
