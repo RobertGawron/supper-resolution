@@ -10,28 +10,6 @@ from srconfig import cfg
 import Camera
 from SRImage import SRImage
 
-def showHelp():
-    print("usage: python3 [script name] SAMPLE OUTPUT_DIRCTORY")
-    print("\twhere:")
-    print("\t\tSAMPLE - an image from which the samples will be created");
-    print("\t\tOUTPUT_DIRCTORY - place where the samples will be created");
-    print("\t\t\tdefault: sampleDirectory in srconfig.py")
-    print("")
-    print("Note: be sure to run the script with Python3 interpreter.") 
-
-def parseCmdArgs(arguments, config):
-    inImageFileName = arguments[1]
-    outDirName = config['inputImageDirectory']
-
-    if (len(arguments) == 3):
-        outDirName = arguments[2]
-
-    return inImageFileName, outDirName  
-
-def mkdirOutput(directory):
-    if not os.path.exists(directory):
-        os.mkdir(directory)
-
 def createSamples(image, outDirectory):
     camera = Camera.Camera(cfg['psf'])
     downscale = 1.0 / cfg['scale']
@@ -49,6 +27,31 @@ def createSamples(image, outDirectory):
         print('Sample created: %s' % sampleFileName)
 
 
+def mkdirOutput(directory):
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+
+
+def showHelp():
+    print("usage: python3 [script name] SAMPLE OUTPUT_DIRCTORY")
+    print("\twhere:")
+    print("\t\tSAMPLE - an image from which the samples will be created");
+    print("\t\tOUTPUT_DIRCTORY - place where the samples will be created");
+    print("\t\t\tdefault: sampleDirectory in srconfig.py")
+    print("")
+    print("Note: be sure to run the script with Python3 interpreter.") 
+
+
+def parseCmdArgs(arguments, config):
+    inImageFileName = arguments[1]
+    outDirName = config['inputImageDirectory']
+
+    if (len(arguments) == 3):
+        outDirName = arguments[2]
+
+    return inImageFileName, outDirName  
+
+
 if __name__ == "__main__":
     if 2 > len(sys.argv) > 3:
         showHelp();
@@ -62,6 +65,5 @@ if __name__ == "__main__":
     print('Input image size: %dx%d' % inImageSize)
     
     mkdirOutput(outDirName)
-
     createSamples(inImage, outDirName)
 
