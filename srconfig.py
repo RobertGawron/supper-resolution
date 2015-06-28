@@ -13,4 +13,5 @@ cfg = {
 
     'scale'          : 5,
     'iterations'     : 3,
+    'inputImageDirectory' : 'input'
 }

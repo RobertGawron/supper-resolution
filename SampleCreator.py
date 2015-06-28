@@ -15,6 +15,7 @@ def showHelp():
     print("\twhere:")
     print("\t\tSAMPLE - an image from which the samples will be created");
     print("\t\tOUTPUT_DIRCTORY - place where the samples will be created");
+    print("\t\t\tdefault: sampleDirectory in srconfig.py")
     print("")
     print("Note: be sure to run the script with Python3 interpreter.") 
 
@@ -40,11 +41,16 @@ def createSamples(image, outDirectory):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if 2 > len(sys.argv) > 3:
         showHelp();
         sys.exit(0)
 
-    inImageFileName, outDirName = sys.argv[1], sys.argv[2]
+    inImageFileName = sys.argv[1]
+    outDirName = cfg['inputImageDirectory'] 
+
+
+    if (len(sys.argv) == 3):
+        outDirName = sys.argv[2]
 
     inImage = SRImage()
     inImage.openFromFile(inImageFileName)
