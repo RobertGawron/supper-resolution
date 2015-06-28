@@ -38,7 +38,7 @@ class Camera:
         self.pxarea = zip(list(mg[0].reshape(-1).tolist()),list(mg[1].reshape(-1).tolist()))
 
 
-    def take_a_photo(self, image, offset, scale):
+    def take(self, image, offset, scale):
 
         # convert to numpy array
         odata  = numpy.asarray(image).astype(numpy.int32)
