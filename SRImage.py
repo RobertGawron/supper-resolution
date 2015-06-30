@@ -16,11 +16,14 @@ class SRImage:
     def openFromFile(self, filename):
         self.image = Image.open(filename)
 
-    def openFromArray(array):
+    def openFromLibImg(self, image):
+        self.image = image
+
+    def openFromArray(self, array):
         assert(False)
 
-    def save(filename):
-        assert(False)
+    def save(self, filename):
+        self.image.save(filename) 
 
     #tmp fix
     def toLibImgType(self):

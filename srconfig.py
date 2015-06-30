@@ -11,6 +11,7 @@ cfg = {
                 2.66971863e-03,   5.36227322e-02,   1.45761699e-01,   5.36227322e-02,    2.66971863e-03 ],
 
 
-    'scale'          : 2,
+    'scale'          : 5,
     'iterations'     : 3,
+    'inputImageDirectory' : 'input'
 }

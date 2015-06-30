@@ -49,7 +49,7 @@ def SRRestore(camera, origImg, samples, upscale, iter):
         (dx,dy) = offset
 
         # make LR of HR given current pixel-offset
-        simulated = camera.take_a_photo(origImg, offset, 1.0/upscale)
+        simulated = camera.take(origImg, offset, 1.0/upscale)
 
         # convert captured and simulated to numpy arrays (mind the data type!)
         cap_arr = numpy.asarray(captured).astype(numpy.float32)
