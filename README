@@ -1,14 +1,18 @@
-= INFO =
+supper-resolution
+====
 
-For information about the project please visit:
+Device to monitor radioactivity around us.
+
+More info:
 
 https://github.com/RobertGawron/supper-resolution/wiki
 
-To contact with the author please send email:
+http://robertgawron.blogspot.com/2011/01/super-resolution-algorithm-implemented.html
 
-robert.gawron@mail.ru
+http://robertgawron.blogspot.com/2013/03/motion-estimation-for-super-resolution.html
 
-= CREDITS =
+
+Credits:
 
 Vanmeerbeeck Geert - major optimizations
 xiaomo - fixed bug in file path
