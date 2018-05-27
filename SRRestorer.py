@@ -106,16 +106,6 @@ def SRRestore(camera, origImg, samples, upscale, iter):
     return Image.fromarray(numpy.uint8(high_res_new)), error
 
 
-def showHelp():
-    print("usage: python %s directory_with_input_images" % sys.argv[0])
-    print("usage: python3 [script name] INPUT_DIRCTORY")
-    print("\twhere:")
-    print("\t\tINPUT_DIRCTORY - directory with samples");
-    print("")
-    print("Note: be sure to run the script with Python3 interpreter.") 
-
-
-
 def loadSamples(directory):
    samples = []
   
@@ -133,23 +123,16 @@ def loadSamples(directory):
             (x, y) = map(int, estimator.offset())
             print ("%s: (%d, %d)" % (sampleFileName, x, y))
             samples.append(((x, y), sample))
-
    return samples
 
-if __name__=="__main__":
-    if len(sys.argv) != 2:
-        showHelp()
-        sys.exit(0)
-
-    sampleDirectory = sys.argv[1]
-
-    print ("Estimate Motion Between Sample And Original Image")
+def main(sampleDirectory, scale, ite):
+    #print ("Estimate Motion Between Sample And Original Image")
     samples = loadSamples(sampleDirectory)
 
-    print ("Restore SR Image")
+    #print ("Restore SR Image")
     camera = Camera.Camera(cfg['psf'])
-   
-    scale = cfg['scale'] 
+
+    scale = scale
     origSizeX = samples[0][1].size[1] * scale 
     origSizeY = samples[0][1].size[0] * scale
     origImage = numpy.zeros([origSizeX, origSizeY, 3]).astype(numpy.float32)
@@ -159,19 +142,15 @@ if __name__=="__main__":
         sampleOrigSize = sample.resize((origSizeX, origSizeY), Image.ANTIALIAS)
         sampleAsArr = numpy.asarray(sampleOrigSize)
 
-    """    origImage += numpy.dstack((
-                                camera.doOffset(sampleAsArr[:,:,0],(-dx,-dy)),
-                                camera.doOffset(sampleAsArr[:,:,1],(-dx,-dy)),
-                                camera.doOffset(sampleAsArr[:,:,2],(-dx,-dy))))
-    """
+
     origImage = origImage / len(samples) # take average value
     origImage = Image.fromarray(numpy.uint8(origImage))
 
     # TODO move this to a separate class
-    for i in range(cfg['iterations']):
+    for i in range(ite):
         origImage, estimDiff = SRRestore(camera, origImage, samples, scale, i)
         #estimDiff = 5
         estimDiff /=  float(origSizeX * origSizeY)
         print ('%2d: estimation error: %3f' % (i, estimDiff))
-    origImage.save('super_resolution.tif')
-
+        
+    origImage.save(os.path.join(sampleDirectory,'super_resolution.tif'))
