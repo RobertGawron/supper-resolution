@@ -110,6 +110,7 @@ def loadSamples(directory):
    samples = []
   
    for sampleFileName in (os.listdir(directory)):
+        print(sampleFileName)
         sampleExtension = sampleFileName[-4:] 
         if sampleExtension != '.tif':
             #print("" % (fileExtension))
@@ -126,9 +127,9 @@ def loadSamples(directory):
    return samples
 
 def main(sampleDirectory, scale, ite):
-    #print ("Estimate Motion Between Sample And Original Image")
+    print ("Estimate Motion Between Sample And Original Image")
     samples = loadSamples(sampleDirectory)
-
+    print("samples loaded")
     #print ("Restore SR Image")
     camera = Camera.Camera(cfg['psf'])
 
