@@ -2,35 +2,29 @@ import os, time
 import SampleCreator
 import SRRestorer
 
-startTime = time.time()
-samplesDir = './set'
-errorFile = 'errors.txt'
-scaleList = [0.5, 1, 2]
+# testing conditions to be modified by user
+scaleList = [1]
+restoringIterations = 2
 
-#for each image
-for i in os.listdir(samplesDir):
-    #iterations
-    for j in range(10, 50, 10):
-        #different scales
-        for k in scaleList:
-            sampleDir = 'sample_' + i[:-4] + '_' + str(k) + '_' + str(j)
-            try:
-                SampleCreator.main(os.path.join(samplesDir, i), sampleDir, k)
-            except BaseException as e:
-                f = open('errorFile.txt', 'a')
-                f.write('###### IMAGE ' + i + ' ######\n')
-                f.write('###### Iteration ' + str(j) + ' ######\n')
-                f.write('Error creating samples\n')
-                f.write(str(e) + '\n\n')
-                f.close()
-            try:
-                SRRestorer.main(sampleDir, k, j)
-            except BaseException as e:
-                f = open('errorFile.txt', 'a')
-                f.write('###### IMAGE ' + i + ' ######\n')
-                f.write('###### Iteration ' + str(j) + ' ######\n')
-                f.write('Error in restoring\n')
-                f.write(str(e) + '\n\n')
-                f.close()
 
-print('elapsed Time: ', str((time.time() - startTime)/60), ' mins')
+samplesDir = './samples'
+trainingImagesDir ='./input'
+
+if __name__=="__main__":
+    os.makedirs(trainingImagesDir, exist_ok = True)
+
+    startTime = time.time()
+
+    #for each image
+    for imageName in os.listdir(samplesDir):
+        for scalingFactor in scaleList:
+            print('Testing algorithm for %s, iterations: %d, scaling factor: %f' % (imageName, restoringIterations, scalingFactor) )
+            print('You can change those values by modyfiying this script.')
+            
+            originalImagePathName = os.path.join(samplesDir, imageName)
+            SampleCreator.main(originalImagePathName, trainingImagesDir, scalingFactor)
+            print('Samples created cuccesfully, restoring (this might take time)')
+
+            SRRestorer.main(trainingImagesDir, scalingFactor, restoringIterations)
+        
+    print('Total elapsed time: %s mins' % str((time.time() - startTime)/60)) 
