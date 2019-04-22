@@ -24,17 +24,11 @@ def createSamples(image, outDirectory, scale):
         sample = SRImage()
         sample.openFromLibImg(camera.take(image.toLibImgType(), (x, y), downscale))
         sample.save(sampleFileName)
-        print('Sample created: %s' % sampleFileName)
 
-
-def mkdirOutput(directory):
-        os.makedirs(directory, exist_ok = True)
 
 def main(inImageFileName, outDirName, scale):
     inImage = SRImage()
     inImage.openFromFile(inImageFileName)
-    inImageSize = inImage.w, inImage.h
-    print('Input image size: %dx%d' % inImageSize)
 
-    mkdirOutput(outDirName)
+    os.makedirs(outDirName, exist_ok = True)
     createSamples(inImage, outDirName, scale)
