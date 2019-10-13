@@ -24,8 +24,9 @@ if __name__=="__main__":
     imageName = sys.argv[1]
 
     # remove artifacts from previous tests
-    for file in os.scandir(srconfig.cfg['inputImageDirectory']):
-        os.unlink(file.path)
+    if os.path.isdir("./input"):
+	    for file in os.scandir(srconfig.cfg['inputImageDirectory']):
+	        os.unlink(file.path)
 
     os.makedirs(srconfig.cfg['inputImageDirectory'], exist_ok = True)
     startTime = time.time()
